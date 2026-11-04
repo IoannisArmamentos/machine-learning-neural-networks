@@ -1,0 +1,5 @@
+# The professor's original scripts use CRLF line endings. Store them byte-for-byte
+# (no end-of-line normalization) so they stay identical to the supplied files.
+mnist_MLP.py         -text
+mnist_CNN.py         -text
+mnist_MobileNetV2.py -text
