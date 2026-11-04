@@ -12,13 +12,13 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
-import platform
 import sys
 from pathlib import Path
 
 import torch
 
 from a2.data import load_mnist, make_loaders
+from a2.environment import TIMING_NOTES, environment
 from a2.experiment import run_once, warmup
 from a2.io_utils import rebuild_combined_summary, write_json, write_predictions, write_rows_csv
 from a2.models import MODEL_SPECS
@@ -27,16 +27,6 @@ from a2.stats import summarize_runs
 DEFAULT_OUT = Path("results/question1")
 SMOKE_OUT = Path("results/smoke/question1")
 SMOKE_TRAIN_BATCHES, SMOKE_TEST_BATCHES = 5, 3
-
-TIMING_NOTES = {
-    "train_seconds": "All epochs: DataLoader iteration (incl. CPU transforms), host->device copies, "
-                     "forward/backward/step. Excludes dataset loading and model construction. "
-                     "Device synchronized at start and end.",
-    "inference_seconds": "Full pass over the test set: DataLoader iteration, host->device copies, "
-                         "forward, argmax. Excludes copying predictions to CPU and accuracy "
-                         "computation. Device synchronized at start and end.",
-}
-
 
 def parse_args(argv=None):
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -62,28 +52,6 @@ def parse_args(argv=None):
     if args.out is None:
         args.out = SMOKE_OUT if args.smoke else DEFAULT_OUT
     return args
-
-
-def cpu_model() -> str:
-    try:
-        for line in Path("/proc/cpuinfo").read_text().splitlines():
-            if line.startswith("model name"):
-                return line.split(":", 1)[1].strip()
-    except OSError:
-        pass
-    return platform.processor() or "unknown"
-
-
-def environment() -> dict:
-    return {
-        "cpu": cpu_model(),
-        "python": platform.python_version(),
-        "pytorch": torch.__version__,
-        "hip": torch.version.hip,
-        "cuda": torch.version.cuda,
-        "gpu": torch.cuda.get_device_name(0),
-        "platform": platform.platform(),
-    }
 
 
 def run_model(name: str, args, device: torch.device) -> None:

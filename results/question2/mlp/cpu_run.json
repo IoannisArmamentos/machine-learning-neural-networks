@@ -1,0 +1,63 @@
+{
+  "question": 2,
+  "model": "mlp",
+  "smoke": false,
+  "device": "cpu",
+  "started": "2026-11-04T21:06:42",
+  "finished": "2026-11-04T21:06:51",
+  "hyperparameters": {
+    "epochs": 5,
+    "batch_size": 100,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "loss": "NLLLoss"
+  },
+  "protocol": {
+    "runs": 1,
+    "seed": 0,
+    "warmup_batches": 20,
+    "num_workers": 0,
+    "max_train_batches_per_epoch": null,
+    "max_test_batches": null
+  },
+  "timing_definitions": {
+    "train_seconds": "All epochs: DataLoader iteration (incl. CPU transforms), host->device copies (no-op on CPU), forward/backward/step. Excludes dataset loading and model construction. Device synchronized at start and end (no-op on CPU).",
+    "inference_seconds": "Full pass over the test set: DataLoader iteration, host->device copies, forward, argmax. Excludes copying predictions to CPU and accuracy computation. Device synchronized at start and end (no-op on CPU)."
+  },
+  "warmup_methodology": "Both CPU (Q2) and GPU (Q1) runs are preceded by the same untimed warm-up: N training batches plus N test-mode forward passes on a throw-away model instance, before seeding. On the GPU it absorbs one-time kernel compilation/autotuning and device context set-up; on the CPU there is no kernel compilation, so it only absorbs first-call overheads (memory allocator growth, oneDNN primitive creation, thread-pool start-up). Timed regions are identical; device synchronization is a no-op on the CPU because CPU operators execute synchronously.",
+  "environment": {
+    "cpu": "AMD Ryzen 9 7900X 12-Core Processor",
+    "python": "3.14.4",
+    "pytorch": "2.15.0+rocm7.14",
+    "hip": "7.14.60850",
+    "cuda": null,
+    "gpu": null,
+    "gpu_visible_to_pytorch": false,
+    "torch_num_threads": 12,
+    "torch_num_interop_threads": 24,
+    "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.43"
+  },
+  "gpu_baseline": {
+    "path": "results/question1/mlp/summary.json",
+    "sha256": "e23ef6f9e3ad818020410913064700f1f904346d6b0e0af31f35d36e27bb5ac4",
+    "warmup_batches": 20,
+    "num_workers": 0,
+    "seeds": [
+      0,
+      1,
+      2
+    ]
+  },
+  "run": {
+    "model": "mlp",
+    "device": "cpu",
+    "seed": 0,
+    "n_correct": 9698,
+    "n_test": 10000,
+    "accuracy_percent": 96.98,
+    "train_seconds": 8.575775061999593,
+    "inference_seconds": 0.24309102200004418,
+    "epoch_seconds": "1.7016;1.7284;1.7174;1.7139;1.7144",
+    "epoch_mean_loss": "0.407638;0.189386;0.137301;0.108271;0.088999"
+  }
+}
