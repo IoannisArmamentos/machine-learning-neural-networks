@@ -1,0 +1,212 @@
+{
+  "question": 5,
+  "model": "mlp_dropout_h800_p0.2",
+  "smoke": false,
+  "device": "gpu",
+  "search_started": "2026-11-04T22:44:51",
+  "created": "2026-11-04T22:49:03",
+  "architecture": {
+    "layers": "Linear(784,800) -> ReLU -> Dropout(0.2) -> Linear(800,10) -> log_softmax",
+    "parameters": 636010
+  },
+  "hyperparameters": {
+    "epochs": 5,
+    "batch_size": 100,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "loss": "NLLLoss"
+  },
+  "search": {
+    "hidden_sizes": [
+      200,
+      400,
+      600,
+      800,
+      1000
+    ],
+    "dropouts": [
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5
+    ],
+    "n_configurations": 25,
+    "best_config_file": "results/question5/best_config.json"
+  },
+  "protocol": {
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "warmup_batches": 20,
+    "num_workers": 0,
+    "final_training_images": 60000,
+    "max_train_batches_per_epoch": null,
+    "max_eval_batches": null,
+    "std_note": "std_sample uses ddof=1 (n-1)"
+  },
+  "timing_definitions": {
+    "train_seconds": "All epochs: DataLoader iteration (incl. CPU transforms), host->device copies (no-op on CPU), forward/backward/step. Excludes dataset loading and model construction. Device synchronized at start and end (no-op on CPU).",
+    "inference_seconds": "Full pass over the test set: DataLoader iteration, host->device copies, forward, argmax. Excludes copying predictions to CPU and accuracy computation. Device synchronized at start and end (no-op on CPU).",
+    "val_inference_seconds": "Full pass over the 6,000 validation images (same boundaries as inference)."
+  },
+  "environment": {
+    "cpu": "AMD Ryzen 9 7900X 12-Core Processor",
+    "python": "3.14.4",
+    "pytorch": "2.15.0+rocm7.14",
+    "hip": "7.14.60850",
+    "cuda": null,
+    "gpu": "AMD Radeon RX 9070 XT",
+    "gpu_visible_to_pytorch": true,
+    "torch_num_threads": 12,
+    "torch_num_interop_threads": 24,
+    "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.43"
+  },
+  "baselines": {
+    "q1_original_mlp": {
+      "path": "results/question1/mlp/summary.json",
+      "sha256": "e23ef6f9e3ad818020410913064700f1f904346d6b0e0af31f35d36e27bb5ac4"
+    },
+    "q4_enhanced_mlp": {
+      "path": "results/question4/summary.json",
+      "sha256": "b43cbabda3168b64ee7b792052590b6d630a08e9559b76662711a9e32c806c66"
+    }
+  },
+  "aggregate": {
+    "accuracy_percent": {
+      "n": 3,
+      "mean": 97.96999999999998,
+      "std_sample": 0.13999999999999652,
+      "std_population": 0.11430952132987879,
+      "min": 97.87,
+      "max": 98.13
+    },
+    "train_seconds": {
+      "n": 3,
+      "mean": 9.222340923333832,
+      "std_sample": 0.12837093839149807,
+      "std_population": 0.10481443228714193,
+      "min": 9.104258626000956,
+      "max": 9.35898056500082
+    },
+    "inference_seconds": {
+      "n": 3,
+      "mean": 0.2547840249996322,
+      "std_sample": 0.0078024551262988896,
+      "std_population": 0.006370677933465052,
+      "min": 0.24804489399866725,
+      "max": 0.26333204500042484
+    }
+  },
+  "comparison": [
+    {
+      "baseline": "q1_original_mlp",
+      "metric": "accuracy_percent",
+      "baseline_mean": 96.96999999999998,
+      "baseline_std_sample": 0.055677643628300626,
+      "new_mean": 97.96999999999998,
+      "new_std_sample": 0.13999999999999652,
+      "difference": 1.0,
+      "ratio": 1.0103124677735382
+    },
+    {
+      "baseline": "q1_original_mlp",
+      "metric": "train_seconds",
+      "baseline_mean": 9.659884514333498,
+      "baseline_std_sample": 0.48347449201805265,
+      "new_mean": 9.222340923333832,
+      "new_std_sample": 0.12837093839149807,
+      "difference": -0.4375435909996668,
+      "ratio": 0.954705090899334
+    },
+    {
+      "baseline": "q1_original_mlp",
+      "metric": "inference_seconds",
+      "baseline_mean": 0.2739205806665268,
+      "baseline_std_sample": 0.0017470929039810532,
+      "new_mean": 0.2547840249996322,
+      "new_std_sample": 0.0078024551262988896,
+      "difference": -0.019136555666894595,
+      "ratio": 0.9301383064378372
+    },
+    {
+      "baseline": "q4_enhanced_mlp",
+      "metric": "accuracy_percent",
+      "baseline_mean": 98.03666666666668,
+      "baseline_std_sample": 0.11590225767142681,
+      "new_mean": 97.96999999999998,
+      "new_std_sample": 0.13999999999999652,
+      "difference": -0.0666666666666913,
+      "ratio": 0.9993199823195401
+    },
+    {
+      "baseline": "q4_enhanced_mlp",
+      "metric": "train_seconds",
+      "baseline_mean": 10.482157230333542,
+      "baseline_std_sample": 0.38758537285041333,
+      "new_mean": 9.222340923333832,
+      "new_std_sample": 0.12837093839149807,
+      "difference": -1.25981630699971,
+      "ratio": 0.8798132598742155
+    },
+    {
+      "baseline": "q4_enhanced_mlp",
+      "metric": "inference_seconds",
+      "baseline_mean": 0.27504038933329866,
+      "baseline_std_sample": 0.01797136296979219,
+      "new_mean": 0.2547840249996322,
+      "new_std_sample": 0.0078024551262988896,
+      "difference": -0.020256364333666455,
+      "ratio": 0.9263513101375106
+    }
+  ],
+  "runs": [
+    {
+      "model": "mlp_dropout_h800_p0.2",
+      "hidden_size": 800,
+      "dropout": 0.2,
+      "run": 1,
+      "seed": 0,
+      "n_train": 60000,
+      "n_correct": 9787,
+      "n_test": 10000,
+      "accuracy_percent": 97.87,
+      "train_seconds": 9.203783578999719,
+      "inference_seconds": 0.2529751359998045,
+      "epoch_seconds": "1.8139;1.8160;1.8896;1.8660;1.8183",
+      "epoch_mean_loss": "0.279786;0.114555;0.076927;0.057784;0.045181"
+    },
+    {
+      "model": "mlp_dropout_h800_p0.2",
+      "hidden_size": 800,
+      "dropout": 0.2,
+      "run": 2,
+      "seed": 1,
+      "n_train": 60000,
+      "n_correct": 9813,
+      "n_test": 10000,
+      "accuracy_percent": 98.13,
+      "train_seconds": 9.104258626000956,
+      "inference_seconds": 0.24804489399866725,
+      "epoch_seconds": "1.8428;1.8476;1.8083;1.8021;1.8035",
+      "epoch_mean_loss": "0.281609;0.114070;0.078543;0.057961;0.045331"
+    },
+    {
+      "model": "mlp_dropout_h800_p0.2",
+      "hidden_size": 800,
+      "dropout": 0.2,
+      "run": 3,
+      "seed": 2,
+      "n_train": 60000,
+      "n_correct": 9791,
+      "n_test": 10000,
+      "accuracy_percent": 97.91,
+      "train_seconds": 9.35898056500082,
+      "inference_seconds": 0.26333204500042484,
+      "epoch_seconds": "1.8062;1.8525;1.8345;1.9115;1.9542",
+      "epoch_mean_loss": "0.282891;0.115890;0.077681;0.057673;0.045116"
+    }
+  ]
+}

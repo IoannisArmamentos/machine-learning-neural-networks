@@ -1,0 +1,28 @@
+{
+  "question": 5,
+  "smoke": false,
+  "hidden_size": 800,
+  "dropout": 0.2,
+  "val_accuracy_percent": 98.06666666666666,
+  "val_n_correct": 5884,
+  "n_val": 6000,
+  "selection_criterion": "validation accuracy only (test set not loaded during the search)",
+  "tie_break_rule": "highest validation accuracy (number of correct validation images); ties broken by fewer hidden neurons, then by lower dropout probability",
+  "n_configurations": 25,
+  "tied_with_best": [],
+  "runner_up": {
+    "hidden_size": 600,
+    "dropout": 0.4,
+    "val_accuracy_percent": 97.98333333333333
+  },
+  "split": {
+    "method": "torch.utils.data.random_split",
+    "seed": 0,
+    "n_train": 54000,
+    "n_val": 6000,
+    "val_indices_sha256": "51b4cd78503d9ef3fc438e82371d4e76d83e1321e5b4850681d3cd5986b066b5",
+    "train_indices_sha256": "220e0fa63a7aeb8007c2ecf7ae94b88139bfb35637b4242e3bf57fbf42a7cd0e"
+  },
+  "search_seed": 0,
+  "selected_at": "2026-11-04T22:48:34"
+}

@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import partial
 from typing import Callable
 
 import torch
@@ -76,6 +77,23 @@ class EnhancedMLP(nn.Module):
         return F.log_softmax(out, dim=1)
 
 
+class DropoutMLP(nn.Module):
+    """Question 5: the original MLP with dropout between the hidden layer (after ReLU) and the output:
+    Linear(784, hidden) -> ReLU -> Dropout(p) -> Linear(hidden, 10) -> log_softmax."""
+
+    def __init__(self, hidden_size: int, dropout: float, input_size: int = 784, num_classes: int = 10):
+        super().__init__()
+        self.input_size = input_size
+        self.l1 = nn.Linear(input_size, hidden_size)
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(dropout)
+        self.l2 = nn.Linear(hidden_size, num_classes)
+
+    def forward(self, x):
+        out = self.dropout(self.relu(self.l1(x)))
+        return F.log_softmax(self.l2(out), dim=1)
+
+
 def build_mobilenet_v2_frozen() -> nn.Module:
     """mnist_MobileNetV2.py: ImageNet weights, features frozen, classifier[1] -> 10 classes."""
     model = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.IMAGENET1K_V1)
@@ -121,3 +139,10 @@ MODEL_SPECS: dict[str, ModelSpec] = {
 # Training configuration identical to the original MLP spec.
 ENHANCED_MLP_SPEC = ModelSpec("mlp_enhanced", EnhancedMLP, nn.NLLLoss, epochs=5,
                               transform="tensor", prepare_input=_flatten)
+
+
+def dropout_mlp_spec(hidden_size: int, dropout: float) -> ModelSpec:
+    """Question 5 model with the original MLP training configuration. Not part of MODEL_SPECS."""
+    return ModelSpec(f"mlp_dropout_h{hidden_size}_p{dropout:g}",
+                     partial(DropoutMLP, hidden_size, dropout), nn.NLLLoss, epochs=5,
+                     transform="tensor", prepare_input=_flatten)

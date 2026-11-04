@@ -98,3 +98,15 @@ def baseline_comparison(new_aggregate: dict, baseline_aggregate: dict,
             "ratio": new["mean"] / base["mean"],
         })
     return rows
+
+
+def load_summary(path: Path, question: int, model: str, device: str = "gpu") -> dict:
+    """Load and sanity-check a saved per-question summary.json (read-only)."""
+    summary = json.loads(path.read_text(encoding="utf-8"))
+    problems = [msg for ok, msg in ((summary.get("question") == question, f"question is not {question}"),
+                                    (summary.get("model") == model, f"model is {summary.get('model')!r}"),
+                                    (summary.get("device") == device, f"device is not {device}"),
+                                    (not summary.get("smoke"), "smoke-test results")) if not ok]
+    if problems:
+        raise ValueError(f"{path}: invalid baseline ({', '.join(problems)})")
+    return summary

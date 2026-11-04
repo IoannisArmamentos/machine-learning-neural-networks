@@ -1,0 +1,36 @@
+PyTorch 2.15.0+rocm7.14 | HIP 7.14.60850 | AMD Radeon RX 9070 XT
+=== Phase 1: 25 configurations, train 54000 / validation 6000 (split seed 0), seed 0
+  [ 1/25] hidden= 200 dropout=0.1: val acc=97.27% (5836/6000)  train=9.14s  val inference=0.167s
+  [ 2/25] hidden= 200 dropout=0.2: val acc=97.33% (5840/6000)  train=9.06s  val inference=0.160s
+  [ 3/25] hidden= 200 dropout=0.3: val acc=97.10% (5826/6000)  train=8.77s  val inference=0.164s
+  [ 4/25] hidden= 200 dropout=0.4: val acc=97.05% (5823/6000)  train=8.93s  val inference=0.161s
+  [ 5/25] hidden= 200 dropout=0.5: val acc=96.67% (5800/6000)  train=8.49s  val inference=0.157s
+  [ 6/25] hidden= 400 dropout=0.1: val acc=97.67% (5860/6000)  train=8.69s  val inference=0.156s
+  [ 7/25] hidden= 400 dropout=0.2: val acc=97.73% (5864/6000)  train=8.54s  val inference=0.163s
+  [ 8/25] hidden= 400 dropout=0.3: val acc=97.73% (5864/6000)  train=9.04s  val inference=0.169s
+  [ 9/25] hidden= 400 dropout=0.4: val acc=97.72% (5863/6000)  train=9.02s  val inference=0.155s
+  [10/25] hidden= 400 dropout=0.5: val acc=97.62% (5857/6000)  train=8.70s  val inference=0.157s
+  [11/25] hidden= 600 dropout=0.1: val acc=97.87% (5872/6000)  train=8.57s  val inference=0.157s
+  [12/25] hidden= 600 dropout=0.2: val acc=97.92% (5875/6000)  train=8.58s  val inference=0.161s
+  [13/25] hidden= 600 dropout=0.3: val acc=97.95% (5877/6000)  train=8.78s  val inference=0.168s
+  [14/25] hidden= 600 dropout=0.4: val acc=97.98% (5879/6000)  train=8.77s  val inference=0.159s
+  [15/25] hidden= 600 dropout=0.5: val acc=97.82% (5869/6000)  train=8.73s  val inference=0.173s
+  [16/25] hidden= 800 dropout=0.1: val acc=97.77% (5866/6000)  train=8.79s  val inference=0.152s
+  [17/25] hidden= 800 dropout=0.2: val acc=98.07% (5884/6000)  train=8.59s  val inference=0.153s
+  [18/25] hidden= 800 dropout=0.3: val acc=97.95% (5877/6000)  train=8.73s  val inference=0.162s
+  [19/25] hidden= 800 dropout=0.4: val acc=97.95% (5877/6000)  train=8.70s  val inference=0.152s
+  [20/25] hidden= 800 dropout=0.5: val acc=97.85% (5871/6000)  train=8.22s  val inference=0.154s
+  [21/25] hidden=1000 dropout=0.1: val acc=97.60% (5856/6000)  train=8.18s  val inference=0.184s
+  [22/25] hidden=1000 dropout=0.2: val acc=97.72% (5863/6000)  train=8.50s  val inference=0.151s
+  [23/25] hidden=1000 dropout=0.3: val acc=97.83% (5870/6000)  train=8.44s  val inference=0.152s
+  [24/25] hidden=1000 dropout=0.4: val acc=97.98% (5879/6000)  train=8.29s  val inference=0.155s
+  [25/25] hidden=1000 dropout=0.5: val acc=97.88% (5873/6000)  train=8.27s  val inference=0.150s
+  => best: hidden=800, dropout=0.2, val acc=98.07%  (written to best_config.json)
+=== Phase 2: mlp_dropout_h800_p0.2, 3 run(s) from scratch on 60000 images
+  run 1 (seed 0): test acc=97.87%  train=9.20s  inference=0.253s
+  run 2 (seed 1): test acc=98.13%  train=9.10s  inference=0.248s
+  run 3 (seed 2): test acc=97.91%  train=9.36s  inference=0.263s
+  => test accuracy 97.97% ± 0.14 (sample SD, n=3); train 9.22s; inference 0.255s
+  vs q1_original_mlp: +1.00 pp
+  vs q4_enhanced_mlp: -0.07 pp
+exit=0
