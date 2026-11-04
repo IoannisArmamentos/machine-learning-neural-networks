@@ -1,0 +1,20 @@
+# Python 3.14. Versions match the environment used for the reported results.
+#
+# torch/torchvision must come from the PyTorch wheel index for your hardware.
+# Install them FIRST, then the rest of this file. pip then keeps the installed
+# build, because "2.15.0+rocm7.14" / "2.15.0+cpu" satisfy "torch==2.15.0".
+#
+# AMD GPU (ROCm 7.14; results were produced on a Radeon RX 9070 XT, gfx1201):
+#   pip install torch==2.15.0 torchvision==0.29.2 --index-url https://download.pytorch.org/whl/rocm7.14
+#   pip install -r requirements.txt
+#
+# CPU only (e.g. CI, unit tests):
+#   pip install torch==2.15.0 torchvision==0.29.2 --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements.txt
+#
+# Installing this file without the first step pulls the default PyPI torch build
+# (CUDA on Linux), which also works on CPU but is a much larger download.
+torch==2.15.0
+torchvision==0.29.2
+numpy==2.5.4
+pillow==13.0.0

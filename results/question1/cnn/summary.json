@@ -1,0 +1,103 @@
+{
+  "question": 1,
+  "model": "cnn",
+  "smoke": false,
+  "device": "gpu",
+  "created": "2026-11-04T20:32:17",
+  "hyperparameters": {
+    "epochs": 5,
+    "batch_size": 100,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "loss": "NLLLoss"
+  },
+  "protocol": {
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "warmup_batches": 20,
+    "num_workers": 0,
+    "max_train_batches_per_epoch": null,
+    "max_test_batches": null,
+    "std_note": "std_sample uses ddof=1 (n-1)"
+  },
+  "timing_definitions": {
+    "train_seconds": "All epochs: DataLoader iteration (incl. CPU transforms), host->device copies, forward/backward/step. Excludes dataset loading and model construction. Device synchronized at start and end.",
+    "inference_seconds": "Full pass over the test set: DataLoader iteration, host->device copies, forward, argmax. Excludes copying predictions to CPU and accuracy computation. Device synchronized at start and end."
+  },
+  "environment": {
+    "cpu": "AMD Ryzen 9 7900X 12-Core Processor",
+    "python": "3.14.4",
+    "pytorch": "2.15.0+rocm7.14",
+    "hip": "7.14.60850",
+    "cuda": null,
+    "gpu": "AMD Radeon RX 9070 XT",
+    "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.43"
+  },
+  "aggregate": {
+    "accuracy_percent": {
+      "n": 3,
+      "mean": 98.89333333333333,
+      "std_sample": 0.09237604307033816,
+      "std_population": 0.07542472332656346,
+      "min": 98.84,
+      "max": 99.0
+    },
+    "train_seconds": {
+      "n": 3,
+      "mean": 9.53949021766645,
+      "std_sample": 0.18143420318760603,
+      "std_population": 0.14814040656602667,
+      "min": 9.426074364999295,
+      "max": 9.748746508000295
+    },
+    "inference_seconds": {
+      "n": 3,
+      "mean": 0.2567114863331881,
+      "std_sample": 0.008738094467998885,
+      "std_population": 0.007134624256944566,
+      "min": 0.248264699000174,
+      "max": 0.2657143289998203
+    }
+  },
+  "runs": [
+    {
+      "model": "cnn",
+      "run": 1,
+      "seed": 0,
+      "n_correct": 9900,
+      "n_test": 10000,
+      "accuracy_percent": 99.0,
+      "train_seconds": 9.44364977999976,
+      "inference_seconds": 0.2657143289998203,
+      "epoch_seconds": "1.9430;1.8573;1.8701;1.8976;1.8756",
+      "epoch_mean_loss": "0.227498;0.064784;0.047805;0.037597;0.030436"
+    },
+    {
+      "model": "cnn",
+      "run": 2,
+      "seed": 1,
+      "n_correct": 9884,
+      "n_test": 10000,
+      "accuracy_percent": 98.84,
+      "train_seconds": 9.426074364999295,
+      "inference_seconds": 0.25615543099956994,
+      "epoch_seconds": "1.8787;1.8912;1.8983;1.8692;1.8883",
+      "epoch_mean_loss": "0.220919;0.066140;0.050242;0.039641;0.034021"
+    },
+    {
+      "model": "cnn",
+      "run": 3,
+      "seed": 2,
+      "n_correct": 9884,
+      "n_test": 10000,
+      "accuracy_percent": 98.84,
+      "train_seconds": 9.748746508000295,
+      "inference_seconds": 0.248264699000174,
+      "epoch_seconds": "1.9297;1.9140;1.9268;1.9218;2.0565",
+      "epoch_mean_loss": "0.236830;0.065452;0.048071;0.037592;0.031682"
+    }
+  ]
+}

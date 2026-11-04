@@ -1,0 +1,103 @@
+{
+  "question": 1,
+  "model": "mobilenetv2",
+  "smoke": false,
+  "device": "gpu",
+  "created": "2026-11-04T20:38:40",
+  "hyperparameters": {
+    "epochs": 3,
+    "batch_size": 100,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "loss": "CrossEntropyLoss"
+  },
+  "protocol": {
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "warmup_batches": 20,
+    "num_workers": 0,
+    "max_train_batches_per_epoch": null,
+    "max_test_batches": null,
+    "std_note": "std_sample uses ddof=1 (n-1)"
+  },
+  "timing_definitions": {
+    "train_seconds": "All epochs: DataLoader iteration (incl. CPU transforms), host->device copies, forward/backward/step. Excludes dataset loading and model construction. Device synchronized at start and end.",
+    "inference_seconds": "Full pass over the test set: DataLoader iteration, host->device copies, forward, argmax. Excludes copying predictions to CPU and accuracy computation. Device synchronized at start and end."
+  },
+  "environment": {
+    "cpu": "AMD Ryzen 9 7900X 12-Core Processor",
+    "python": "3.14.4",
+    "pytorch": "2.15.0+rocm7.14",
+    "hip": "7.14.60850",
+    "cuda": null,
+    "gpu": "AMD Radeon RX 9070 XT",
+    "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.43"
+  },
+  "aggregate": {
+    "accuracy_percent": {
+      "n": 3,
+      "mean": 95.98666666666668,
+      "std_sample": 0.1814754345175508,
+      "std_population": 0.14817407180595366,
+      "min": 95.78,
+      "max": 96.12
+    },
+    "train_seconds": {
+      "n": 3,
+      "mean": 120.35984500233342,
+      "std_sample": 1.7533152829506518,
+      "std_population": 1.4315759338175356,
+      "min": 118.36414284999955,
+      "max": 121.65264382100031
+    },
+    "inference_seconds": {
+      "n": 3,
+      "mean": 6.388446165999994,
+      "std_sample": 0.07850050490754205,
+      "std_population": 0.06409539385810827,
+      "min": 6.298048489999928,
+      "max": 6.439435029999913
+    }
+  },
+  "runs": [
+    {
+      "model": "mobilenetv2",
+      "run": 1,
+      "seed": 0,
+      "n_correct": 9606,
+      "n_test": 10000,
+      "accuracy_percent": 96.06,
+      "train_seconds": 118.36414284999955,
+      "inference_seconds": 6.439435029999913,
+      "epoch_seconds": "38.7168;40.4684;39.1786",
+      "epoch_mean_loss": "0.416056;0.209060;0.179080"
+    },
+    {
+      "model": "mobilenetv2",
+      "run": 2,
+      "seed": 1,
+      "n_correct": 9612,
+      "n_test": 10000,
+      "accuracy_percent": 96.12,
+      "train_seconds": 121.06274833600037,
+      "inference_seconds": 6.298048489999928,
+      "epoch_seconds": "40.5132;40.1988;40.3504",
+      "epoch_mean_loss": "0.404035;0.206848;0.180893"
+    },
+    {
+      "model": "mobilenetv2",
+      "run": 3,
+      "seed": 2,
+      "n_correct": 9578,
+      "n_test": 10000,
+      "accuracy_percent": 95.78,
+      "train_seconds": 121.65264382100031,
+      "inference_seconds": 6.427854978000141,
+      "epoch_seconds": "40.1232;40.1825;41.3466",
+      "epoch_mean_loss": "0.421216;0.209461;0.179160"
+    }
+  ]
+}
