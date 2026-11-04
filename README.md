@@ -20,7 +20,7 @@ All three use mini-batch size 100, learning rate 0.001, Adam and cross-entropy (
 
 1. Run each network 3 times on the GPU: test accuracy (mean and standard deviation), training time and test-set inference time. **Done.**
 2. Run each network once without a GPU and compare the times with Question 1. **Done.**
-3. Analyse misclassified test images per network and those misclassified by all three.
+3. Analyse misclassified test images per network and those misclassified by all three. **Done.**
 4. New MLP with two hidden layers (500 and 200, ReLU, dropout 0.2).
 5. Original MLP with dropout: choose the dropout probability and hidden size on a 10% validation set.
 6. MobileNetV2 with the whole pretrained network fine-tuned.
@@ -49,12 +49,14 @@ MNIST is downloaded to `data/` on first run and is not tracked. The first Mobile
 python q1_gpu_baseline.py --model all
 # Question 2: 1 CPU run per model (seed 0), GPU hidden; MobileNetV2 takes ~46 min
 python q2_cpu_comparison.py --model all
-# Quick pipeline check of either script (truncated runs, written to results/smoke/, not tracked)
+# Question 3: misclassification analysis of Question 1 run 1 (seed 0); reads saved predictions, seconds
+python q3_misclassification_analysis.py
+# Quick pipeline check of the Question 1/2 scripts (truncated runs, written to results/smoke/, not tracked)
 python q1_gpu_baseline.py --model all --smoke
 python q2_cpu_comparison.py --model all --smoke
 ```
 
-Both scripts accept `--model mlp cnn mobilenetv2`, `--warmup-batches` (default 20), `--num-workers` (default 0, as in the original scripts), `--out` and `--overwrite`. They refuse to replace existing results without `--overwrite`. `q2_cpu_comparison.py` reads the Question 1 results as its GPU baseline and never writes to them.
+Both scripts accept `--model mlp cnn mobilenetv2`, `--warmup-batches` (default 20), `--num-workers` (default 0, as in the original scripts), `--out` and `--overwrite`. They refuse to replace existing results without `--overwrite`. `q2_cpu_comparison.py` reads the Question 1 results as its GPU baseline and never writes to them. `q3_misclassification_analysis.py` (`--run 1`, `--per-digit 6`, `--top-pairs 5`, `--out`, `--overwrite`) only reads the Question 1 prediction files and the MNIST test images.
 
 ## Results
 
@@ -82,6 +84,18 @@ Speedup = CPU time / GPU time (above 1×: GPU faster).
 
 Details: [`results/question2/SUMMARY.md`](results/question2/SUMMARY.md)
 
+### Question 3: misclassifications of Question 1 run 1 (seed 0)
+
+| Model | Misclassified | Highest error rate (true digit) | Most frequent confusion (true → predicted) |
+|---|---|---|---|
+| MLP | 302 | 2 (4.36 %) | 2 → 8 (17) |
+| CNN | 100 | 9 (2.08 %) | 3 → 5 (7) |
+| MobileNetV2 | 394 | 2 (6.69 %) | 5 → 3 (25) |
+
+29 test images are misclassified by all three models. Error rates are per true digit (errors / test images of that digit), because the classes have different sizes. The figures in `results/question3/figures/` show misclassified images with their MNIST index and true and predicted labels.
+
+Details: [`results/question3/SUMMARY.md`](results/question3/SUMMARY.md)
+
 ## Methodology
 
 - Training time covers all epochs, including data loading. Inference time covers one full pass over the test set. Dataset loading and model construction are excluded.
@@ -89,6 +103,7 @@ Details: [`results/question2/SUMMARY.md`](results/question2/SUMMARY.md)
 - Before the timed runs, 20 untimed warm-up batches run on a throw-away model, on both devices. On the GPU they absorb one-time kernel compilation.
 - Each run is seeded (weight initialisation and shuffle order). Test predictions are saved with their MNIST test index.
 - For Question 2, the GPU is hidden from PyTorch before `torch` is imported, and the script stops if a GPU is still visible.
+- For Question 3, the saved predictions of Question 1 run 1 are used without retraining. Every figure is drawn from the original MNIST test images, matched by test index. Examples are chosen by lowest test index.
 
 Changes compared with the original scripts: none to architectures, hyperparameters, loss, optimiser, transforms or data loaders. The harness adds timing, seeding, repetition, warm-up and result files. The test loader also returns each image's index. MobileNetV2's per-epoch loss is accumulated on the device instead of with a per-step `.item()` call.
 
@@ -100,15 +115,15 @@ Differences between the PDF and the code: the PDF lists the CNN as conv → pool
 python -m unittest discover -s tests -t . -v
 ```
 
-27 unit tests cover timing, aggregation, prediction files, model fidelity, speedup calculation, baseline validation and CPU-only enforcement. They use synthetic data on the CPU: no GPU, no MNIST download, no pretrained weights. GitHub Actions (`.github/workflows/python-tests.yml`) runs them with CPU-only PyTorch on every pull request and push to `master`.
+42 unit tests cover timing, aggregation, prediction files, model fidelity, speedup calculation, baseline validation, CPU-only enforcement, misclassification counting, confusion pairs, index alignment, common errors and figure generation. They use synthetic data on the CPU: no GPU, no MNIST download, no pretrained weights. GitHub Actions (`.github/workflows/python-tests.yml`) runs them with CPU-only PyTorch on every pull request and push to `master`.
 
 ## Directories
 
 - `mnist_*.py`: the original scripts (unchanged).
-- `a2/`: shared code (`models`, `data`, `timing`, `experiment`, `stats`, `io_utils`, `environment`, `compare`).
-- `q1_gpu_baseline.py`, `q2_cpu_comparison.py`: experiment scripts for Questions 1 and 2.
+- `a2/`: shared code (`models`, `data`, `timing`, `experiment`, `stats`, `io_utils`, `environment`, `compare`, `misclassification`, `figures`).
+- `q1_gpu_baseline.py`, `q2_cpu_comparison.py`, `q3_misclassification_analysis.py`: scripts for Questions 1–3.
 - `tests/`: unit tests.
-- `results/question1/`, `results/question2/`: per-question CSV/JSON results, per-image predictions, logs and `SUMMARY.md`.
+- `results/question1/`, `results/question2/`, `results/question3/`: per-question CSV/JSON results, per-image predictions, logs, figures and `SUMMARY.md`.
 - `docs/`: the assignment description (PDF).
 
 ---
@@ -133,7 +148,7 @@ python -m unittest discover -s tests -t . -v
 
 1. Εκτέλεση κάθε δικτύου 3 φορές με GPU: test accuracy (μέσος όρος και τυπική απόκλιση), χρόνος εκπαίδευσης και χρόνος εφαρμογής στο test set. **Ολοκληρώθηκε.**
 2. Εκτέλεση κάθε δικτύου μία φορά χωρίς GPU και σύγκριση των χρόνων με το Ερώτημα 1. **Ολοκληρώθηκε.**
-3. Ανάλυση των εικόνων του test set που ταξινομούνται λάθος από κάθε δίκτυο και από τα τρία μαζί.
+3. Ανάλυση των εικόνων του test set που ταξινομούνται λάθος από κάθε δίκτυο και από τα τρία μαζί. **Ολοκληρώθηκε.**
 4. Νέο MLP με δύο κρυμμένα επίπεδα (500 και 200, ReLU, dropout 0.2).
 5. Αρχικό MLP με dropout: επιλογή πιθανότητας dropout και διάστασης κρυμμένου επιπέδου με validation set 10%.
 6. MobileNetV2 με fine-tuning ολόκληρου του προ-εκπαιδευμένου δικτύου.
@@ -162,12 +177,14 @@ pip install -r requirements.txt
 python q1_gpu_baseline.py --model all
 # Ερώτημα 2: 1 εκτέλεση ανά μοντέλο σε CPU (seed 0), με κρυμμένη GPU· το MobileNetV2 διαρκεί ~46 λεπτά
 python q2_cpu_comparison.py --model all
-# Γρήγορος έλεγχος της ροής για κάθε script (περικομμένες εκτελέσεις, στο results/smoke/, εκτός αποθετηρίου)
+# Ερώτημα 3: ανάλυση λαθών της εκτέλεσης 1 (seed 0) του Ερωτήματος 1· διαβάζει τις αποθηκευμένες προβλέψεις, δευτερόλεπτα
+python q3_misclassification_analysis.py
+# Γρήγορος έλεγχος της ροής για τα scripts των Ερωτημάτων 1/2 (περικομμένες εκτελέσεις, στο results/smoke/, εκτός αποθετηρίου)
 python q1_gpu_baseline.py --model all --smoke
 python q2_cpu_comparison.py --model all --smoke
 ```
 
-Και τα δύο scripts δέχονται `--model mlp cnn mobilenetv2`, `--warmup-batches` (προεπιλογή 20), `--num-workers` (προεπιλογή 0, όπως στα αρχικά scripts), `--out` και `--overwrite`. Δεν αντικαθιστούν υπάρχοντα αποτελέσματα χωρίς `--overwrite`. Το `q2_cpu_comparison.py` διαβάζει τα αποτελέσματα του Ερωτήματος 1 ως GPU baseline και δεν γράφει ποτέ σε αυτά.
+Και τα δύο scripts δέχονται `--model mlp cnn mobilenetv2`, `--warmup-batches` (προεπιλογή 20), `--num-workers` (προεπιλογή 0, όπως στα αρχικά scripts), `--out` και `--overwrite`. Δεν αντικαθιστούν υπάρχοντα αποτελέσματα χωρίς `--overwrite`. Το `q2_cpu_comparison.py` διαβάζει τα αποτελέσματα του Ερωτήματος 1 ως GPU baseline και δεν γράφει ποτέ σε αυτά. Το `q3_misclassification_analysis.py` (`--run 1`, `--per-digit 6`, `--top-pairs 5`, `--out`, `--overwrite`) διαβάζει μόνο τα αρχεία προβλέψεων του Ερωτήματος 1 και τις εικόνες του MNIST test set.
 
 ## Αποτελέσματα
 
@@ -195,6 +212,18 @@ python q2_cpu_comparison.py --model all --smoke
 
 Λεπτομέρειες: [`results/question2/SUMMARY.md`](results/question2/SUMMARY.md)
 
+### Ερώτημα 3: λάθη της εκτέλεσης 1 (seed 0) του Ερωτήματος 1
+
+| Μοντέλο | Λάθος ταξινομήσεις | Υψηλότερο ποσοστό λάθους (πραγματικό ψηφίο) | Συχνότερη σύγχυση (πραγματικό → πρόβλεψη) |
+|---|---|---|---|
+| MLP | 302 | 2 (4,36 %) | 2 → 8 (17) |
+| CNN | 100 | 9 (2,08 %) | 3 → 5 (7) |
+| MobileNetV2 | 394 | 2 (6,69 %) | 5 → 3 (25) |
+
+29 εικόνες του test set ταξινομούνται λάθος και από τα τρία μοντέλα. Τα ποσοστά λάθους υπολογίζονται ανά πραγματικό ψηφίο (λάθη / εικόνες του test set με αυτό το ψηφίο), επειδή οι κλάσεις έχουν διαφορετικό μέγεθος. Τα σχήματα στο `results/question3/figures/` δείχνουν εικόνες που ταξινομήθηκαν λάθος, με τον δείκτη τους στο MNIST, την πραγματική ετικέτα και την πρόβλεψη.
+
+Λεπτομέρειες: [`results/question3/SUMMARY.md`](results/question3/SUMMARY.md)
+
 ## Μεθοδολογία
 
 - Ο χρόνος εκπαίδευσης καλύπτει όλα τα epochs, μαζί με τη φόρτωση δεδομένων. Ο χρόνος εφαρμογής καλύπτει ένα πλήρες πέρασμα του test set. Η φόρτωση του dataset και η δημιουργία του μοντέλου εξαιρούνται.
@@ -202,6 +231,7 @@ python q2_cpu_comparison.py --model all --smoke
 - Πριν από τις χρονομετρούμενες εκτελέσεις, εκτελούνται 20 μη χρονομετρούμενα warm-up batches σε ένα μοντέλο που απορρίπτεται, και στις δύο συσκευές. Στη GPU απορροφούν την εφάπαξ μεταγλώττιση των kernels.
 - Κάθε εκτέλεση έχει seed (αρχικοποίηση βαρών και σειρά ανακατέματος). Οι προβλέψεις στο test set αποθηκεύονται μαζί με τον δείκτη κάθε εικόνας στο MNIST test set.
 - Στο Ερώτημα 2 η GPU αποκρύπτεται από το PyTorch πριν από το import του `torch`, και το script σταματά αν η GPU παραμένει ορατή.
+- Στο Ερώτημα 3 χρησιμοποιούνται οι αποθηκευμένες προβλέψεις της εκτέλεσης 1 του Ερωτήματος 1, χωρίς επανεκπαίδευση. Κάθε σχήμα δημιουργείται από τις αρχικές εικόνες του MNIST test set, με αντιστοίχιση μέσω του δείκτη τους. Τα παραδείγματα επιλέγονται με βάση τον μικρότερο δείκτη στο test set.
 
 Αλλαγές σε σχέση με τα αρχικά scripts: καμία στις αρχιτεκτονικές, τις υπερ-παραμέτρους, τη συνάρτηση loss, τον optimizer, τους μετασχηματισμούς ή τους data loaders. Το πλαίσιο πειραμάτων προσθέτει χρονομέτρηση, seeds, επαναλήψεις, warm-up και αρχεία αποτελεσμάτων. Ο test loader επιστρέφει επίσης τον δείκτη κάθε εικόνας. Το loss ανά epoch του MobileNetV2 αθροίζεται στη συσκευή αντί για κλήση `.item()` σε κάθε βήμα.
 
@@ -213,13 +243,13 @@ python q2_cpu_comparison.py --model all --smoke
 python -m unittest discover -s tests -t . -v
 ```
 
-27 unit tests ελέγχουν τη χρονομέτρηση, τη συγκέντρωση αποτελεσμάτων, τα αρχεία προβλέψεων, την πιστότητα των μοντέλων, τον υπολογισμό της επιτάχυνσης, τον έλεγχο του GPU baseline και την εκτέλεση μόνο σε CPU. Χρησιμοποιούν συνθετικά δεδομένα σε CPU: χωρίς GPU, χωρίς download του MNIST, χωρίς προ-εκπαιδευμένα βάρη. Το GitHub Actions (`.github/workflows/python-tests.yml`) τα εκτελεί με PyTorch μόνο για CPU σε κάθε pull request και push στο `master`.
+42 unit tests ελέγχουν τη χρονομέτρηση, τη συγκέντρωση αποτελεσμάτων, τα αρχεία προβλέψεων, την πιστότητα των μοντέλων, τον υπολογισμό της επιτάχυνσης, τον έλεγχο του GPU baseline, την εκτέλεση μόνο σε CPU, την καταμέτρηση λαθών, τα ζεύγη σύγχυσης, την αντιστοίχιση δεικτών, τα κοινά λάθη και τη δημιουργία σχημάτων. Χρησιμοποιούν συνθετικά δεδομένα σε CPU: χωρίς GPU, χωρίς download του MNIST, χωρίς προ-εκπαιδευμένα βάρη. Το GitHub Actions (`.github/workflows/python-tests.yml`) τα εκτελεί με PyTorch μόνο για CPU σε κάθε pull request και push στο `master`.
 
 ## Φάκελοι
 
 - `mnist_*.py`: τα αρχικά scripts (αμετάβλητα).
-- `a2/`: κοινός κώδικας (`models`, `data`, `timing`, `experiment`, `stats`, `io_utils`, `environment`, `compare`).
-- `q1_gpu_baseline.py`, `q2_cpu_comparison.py`: scripts πειραμάτων για τα Ερωτήματα 1 και 2.
+- `a2/`: κοινός κώδικας (`models`, `data`, `timing`, `experiment`, `stats`, `io_utils`, `environment`, `compare`, `misclassification`, `figures`).
+- `q1_gpu_baseline.py`, `q2_cpu_comparison.py`, `q3_misclassification_analysis.py`: scripts για τα Ερωτήματα 1–3.
 - `tests/`: unit tests.
-- `results/question1/`, `results/question2/`: αποτελέσματα CSV/JSON ανά ερώτημα, προβλέψεις ανά εικόνα, logs και `SUMMARY.md`.
+- `results/question1/`, `results/question2/`, `results/question3/`: αποτελέσματα CSV/JSON ανά ερώτημα, προβλέψεις ανά εικόνα, logs, σχήματα και `SUMMARY.md`.
 - `docs/`: η εκφώνηση της εργασίας (PDF).

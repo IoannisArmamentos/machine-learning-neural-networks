@@ -1,0 +1,5 @@
+models,errors_each,common_errors,union_errors,jaccard
+mlp+cnn,302;100,59,343,0.17201166180758018
+mlp+mobilenetv2,302;394,108,588,0.1836734693877551
+cnn+mobilenetv2,100;394,45,449,0.10022271714922049
+mlp+cnn+mobilenetv2,302;100;394,29,613,0.04730831973898858

@@ -1,0 +1,4 @@
+model,run,seed,predictions_file,predictions_sha256,n_test,n_correct,n_errors,accuracy_percent
+mlp,1,0,results/question1/mlp/predictions_run1_seed0.csv,565e33c162dd2e74c2b0f9ac33abf6be21805b5b7ec3657488d24c694ce4c98e,10000,9698,302,96.98
+cnn,1,0,results/question1/cnn/predictions_run1_seed0.csv,f55d59b22ae58360866c1c40597d91e882fb08fb3d5eafa6b941ec9aba00bc74,10000,9900,100,99.0
+mobilenetv2,1,0,results/question1/mobilenetv2/predictions_run1_seed0.csv,f990c22f794f5d394614a9abf7f5b5ebd2194788dc4f871db6aa7f303d555af9,10000,9606,394,96.06
