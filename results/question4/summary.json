@@ -1,0 +1,146 @@
+{
+  "question": 4,
+  "model": "mlp_enhanced",
+  "smoke": false,
+  "device": "gpu",
+  "created": "2026-11-04T22:30:26",
+  "architecture": {
+    "layers": "Linear(784,500) -> ReLU -> Dropout(0.2) -> Linear(500,200) -> ReLU -> Dropout(0.2) -> Linear(200,10) -> log_softmax",
+    "parameters": 494710
+  },
+  "hyperparameters": {
+    "epochs": 5,
+    "batch_size": 100,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "loss": "NLLLoss",
+    "dropout": 0.2
+  },
+  "protocol": {
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "warmup_batches": 20,
+    "num_workers": 0,
+    "max_train_batches_per_epoch": null,
+    "max_test_batches": null,
+    "std_note": "std_sample uses ddof=1 (n-1)"
+  },
+  "timing_definitions": {
+    "train_seconds": "All epochs: DataLoader iteration (incl. CPU transforms), host->device copies (no-op on CPU), forward/backward/step. Excludes dataset loading and model construction. Device synchronized at start and end (no-op on CPU).",
+    "inference_seconds": "Full pass over the test set: DataLoader iteration, host->device copies, forward, argmax. Excludes copying predictions to CPU and accuracy computation. Device synchronized at start and end (no-op on CPU)."
+  },
+  "environment": {
+    "cpu": "AMD Ryzen 9 7900X 12-Core Processor",
+    "python": "3.14.4",
+    "pytorch": "2.15.0+rocm7.14",
+    "hip": "7.14.60850",
+    "cuda": null,
+    "gpu": "AMD Radeon RX 9070 XT",
+    "gpu_visible_to_pytorch": true,
+    "torch_num_threads": 12,
+    "torch_num_interop_threads": 24,
+    "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.43"
+  },
+  "baseline": {
+    "path": "results/question1/mlp/summary.json",
+    "sha256": "e23ef6f9e3ad818020410913064700f1f904346d6b0e0af31f35d36e27bb5ac4",
+    "model": "mlp (Question 1, original architecture)",
+    "comparison_note": "difference = Q4 - Q1 (accuracy in percentage points, times in seconds); ratio = Q4 / Q1"
+  },
+  "aggregate": {
+    "accuracy_percent": {
+      "n": 3,
+      "mean": 98.03666666666668,
+      "std_sample": 0.11590225767142681,
+      "std_population": 0.09463379711052429,
+      "min": 97.96,
+      "max": 98.17
+    },
+    "train_seconds": {
+      "n": 3,
+      "mean": 10.482157230333542,
+      "std_sample": 0.38758537285041333,
+      "std_population": 0.31646213174996035,
+      "min": 10.051836823000485,
+      "max": 10.8038100699996
+    },
+    "inference_seconds": {
+      "n": 3,
+      "mean": 0.27504038933329866,
+      "std_sample": 0.01797136296979219,
+      "std_population": 0.014673556419446468,
+      "min": 0.2595900359992811,
+      "max": 0.29476285000055213
+    }
+  },
+  "comparison_vs_q1_mlp": [
+    {
+      "metric": "accuracy_percent",
+      "baseline_mean": 96.96999999999998,
+      "baseline_std_sample": 0.055677643628300626,
+      "new_mean": 98.03666666666668,
+      "new_std_sample": 0.11590225767142681,
+      "difference": 1.0666666666666913,
+      "ratio": 1.0109999656251076
+    },
+    {
+      "metric": "train_seconds",
+      "baseline_mean": 9.659884514333498,
+      "baseline_std_sample": 0.48347449201805265,
+      "new_mean": 10.482157230333542,
+      "new_std_sample": 0.38758537285041333,
+      "difference": 0.8222727160000431,
+      "ratio": 1.0851224168135696
+    },
+    {
+      "metric": "inference_seconds",
+      "baseline_mean": 0.2739205806665268,
+      "baseline_std_sample": 0.0017470929039810532,
+      "new_mean": 0.27504038933329866,
+      "new_std_sample": 0.01797136296979219,
+      "difference": 0.0011198086667718599,
+      "ratio": 1.0040880778802639
+    }
+  ],
+  "runs": [
+    {
+      "model": "mlp_enhanced",
+      "run": 1,
+      "seed": 0,
+      "n_correct": 9817,
+      "n_test": 10000,
+      "accuracy_percent": 98.17,
+      "train_seconds": 10.59082479800054,
+      "inference_seconds": 0.29476285000055213,
+      "epoch_seconds": "2.1000;2.1132;2.1359;2.1023;2.1390",
+      "epoch_mean_loss": "0.297654;0.118537;0.082044;0.063516;0.052912"
+    },
+    {
+      "model": "mlp_enhanced",
+      "run": 2,
+      "seed": 1,
+      "n_correct": 9796,
+      "n_test": 10000,
+      "accuracy_percent": 97.96,
+      "train_seconds": 10.8038100699996,
+      "inference_seconds": 0.27076828200006275,
+      "epoch_seconds": "2.1546;2.1702;2.2509;2.0563;2.1717",
+      "epoch_mean_loss": "0.303136;0.118364;0.084121;0.063804;0.053541"
+    },
+    {
+      "model": "mlp_enhanced",
+      "run": 3,
+      "seed": 2,
+      "n_correct": 9798,
+      "n_test": 10000,
+      "accuracy_percent": 97.98,
+      "train_seconds": 10.051836823000485,
+      "inference_seconds": 0.2595900359992811,
+      "epoch_seconds": "2.0373;2.0160;2.0542;1.9797;1.9637",
+      "epoch_mean_loss": "0.301563;0.115757;0.081788;0.064142;0.050764"
+    }
+  ]
+}

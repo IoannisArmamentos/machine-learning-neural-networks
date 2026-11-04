@@ -53,6 +53,29 @@ class CNNet(nn.Module):
         return F.log_softmax(x, dim=1)
 
 
+class EnhancedMLP(nn.Module):
+    """Question 4: 784 -> 500 -> ReLU -> Dropout(0.2) -> 200 -> ReLU -> Dropout(0.2) -> 10 -> log_softmax.
+    Output and loss follow the original MLP (log_softmax + NLLLoss)."""
+
+    def __init__(self, input_size: int = 784, hidden1: int = 500, hidden2: int = 200,
+                 num_classes: int = 10, dropout: float = 0.2):
+        super().__init__()
+        self.input_size = input_size
+        self.l1 = nn.Linear(input_size, hidden1)
+        self.relu1 = nn.ReLU()
+        self.drop1 = nn.Dropout(dropout)
+        self.l2 = nn.Linear(hidden1, hidden2)
+        self.relu2 = nn.ReLU()
+        self.drop2 = nn.Dropout(dropout)
+        self.l3 = nn.Linear(hidden2, num_classes)
+
+    def forward(self, x):
+        out = self.drop1(self.relu1(self.l1(x)))
+        out = self.drop2(self.relu2(self.l2(out)))
+        out = self.l3(out)
+        return F.log_softmax(out, dim=1)
+
+
 def build_mobilenet_v2_frozen() -> nn.Module:
     """mnist_MobileNetV2.py: ImageNet weights, features frozen, classifier[1] -> 10 classes."""
     model = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.IMAGENET1K_V1)
@@ -93,3 +116,8 @@ MODEL_SPECS: dict[str, ModelSpec] = {
     "mobilenetv2": ModelSpec("mobilenetv2", build_mobilenet_v2_frozen, nn.CrossEntropyLoss, epochs=3,
                              transform="imagenet", prepare_input=_identity),
 }
+
+# Question 4 model. Kept out of MODEL_SPECS so the Question 1-3 scripts ("--model all") are unchanged.
+# Training configuration identical to the original MLP spec.
+ENHANCED_MLP_SPEC = ModelSpec("mlp_enhanced", EnhancedMLP, nn.NLLLoss, epochs=5,
+                              transform="tensor", prepare_input=_flatten)

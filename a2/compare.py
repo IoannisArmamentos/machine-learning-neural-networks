@@ -71,3 +71,30 @@ def comparison_row(cpu_run: dict, gpu_summary: dict) -> dict:
         "inference_speedup_same_seed":
             speedup(cpu_run["inference_seconds"], same["inference_seconds"]) if same else None,
     }
+
+
+BASELINE_COMPARISON_FIELDS = (
+    "metric", "baseline_mean", "baseline_std_sample", "new_mean", "new_std_sample",
+    "difference", "ratio",
+)
+
+
+def baseline_comparison(new_aggregate: dict, baseline_aggregate: dict,
+                        metrics=("accuracy_percent", "train_seconds", "inference_seconds")) -> list[dict]:
+    """Per metric: difference = new - baseline (accuracy: percentage points; times: seconds,
+    positive = slower) and ratio = new / baseline. Inputs are `summarize_runs` aggregates."""
+    rows = []
+    for m in metrics:
+        new, base = new_aggregate[m], baseline_aggregate[m]
+        if base["mean"] == 0:
+            raise ValueError(f"baseline mean of {m} is zero")
+        rows.append({
+            "metric": m,
+            "baseline_mean": base["mean"],
+            "baseline_std_sample": base["std_sample"],
+            "new_mean": new["mean"],
+            "new_std_sample": new["std_sample"],
+            "difference": new["mean"] - base["mean"],
+            "ratio": new["mean"] / base["mean"],
+        })
+    return rows
