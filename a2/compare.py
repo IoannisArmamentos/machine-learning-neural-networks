@@ -110,3 +110,8 @@ def load_summary(path: Path, question: int, model: str, device: str = "gpu") -> 
     if problems:
         raise ValueError(f"{path}: invalid baseline ({', '.join(problems)})")
     return summary
+
+
+def protocol_differences(baseline_protocol: dict, **current) -> dict:
+    """{field: (baseline value, current value)} for every protocol field that differs."""
+    return {k: (baseline_protocol.get(k), v) for k, v in current.items() if baseline_protocol.get(k) != v}

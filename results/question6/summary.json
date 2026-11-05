@@ -1,0 +1,150 @@
+{
+  "question": 6,
+  "model": "mobilenetv2_full_finetune",
+  "smoke": false,
+  "device": "gpu",
+  "created": "2026-11-05T10:32:47",
+  "hyperparameters": {
+    "epochs": 3,
+    "batch_size": 100,
+    "learning_rate": 0.001,
+    "optimizer": "Adam (all model parameters)",
+    "loss": "CrossEntropyLoss"
+  },
+  "protocol": {
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "warmup_batches": 20,
+    "num_workers": 0,
+    "max_train_batches_per_epoch": null,
+    "max_test_batches": null,
+    "mixed_precision": false,
+    "gradient_accumulation": false,
+    "std_note": "std_sample uses ddof=1 (n-1)"
+  },
+  "parameters": {
+    "total": 2236682,
+    "trainable": 2236682,
+    "frozen": 0,
+    "features_total": 2223872,
+    "features_trainable": 2223872,
+    "classifier_trainable": 12810
+  },
+  "aggregate": {
+    "accuracy_percent": {
+      "n": 3,
+      "mean": 99.03000000000002,
+      "std_sample": 0.21071307505705533,
+      "std_population": 0.172046505340853,
+      "min": 98.81,
+      "max": 99.23
+    },
+    "train_seconds": {
+      "n": 3,
+      "mean": 603.3942608363328,
+      "std_sample": 1.7919202719700942,
+      "std_population": 1.4630967753586628,
+      "min": 601.3869531,
+      "max": 604.832673257999
+    },
+    "inference_seconds": {
+      "n": 3,
+      "mean": 6.424121539333403,
+      "std_sample": 0.10170115139240887,
+      "std_population": 0.08303864238831489,
+      "min": 6.307138723999742,
+      "max": 6.491523046999646
+    }
+  },
+  "comparison_vs_q1_mobilenet": [
+    {
+      "metric": "accuracy_percent",
+      "baseline_mean": 95.98666666666668,
+      "baseline_std_sample": 0.1814754345175508,
+      "new_mean": 99.03000000000002,
+      "new_std_sample": 0.21071307505705533,
+      "difference": 3.0433333333333366,
+      "ratio": 1.0317057924711766
+    },
+    {
+      "metric": "train_seconds",
+      "baseline_mean": 120.35984500233342,
+      "baseline_std_sample": 1.7533152829506518,
+      "new_mean": 603.3942608363328,
+      "new_std_sample": 1.7919202719700942,
+      "difference": 483.0344158339994,
+      "ratio": 5.013252225645811
+    },
+    {
+      "metric": "inference_seconds",
+      "baseline_mean": 6.388446165999994,
+      "baseline_std_sample": 0.07850050490754205,
+      "new_mean": 6.424121539333403,
+      "new_std_sample": 0.10170115139240887,
+      "difference": 0.03567537333340898,
+      "ratio": 1.0055843584506163
+    },
+    {
+      "metric": "trainable_parameters",
+      "baseline_mean": 12810,
+      "baseline_std_sample": "",
+      "new_mean": 2236682,
+      "new_std_sample": "",
+      "difference": 2223872,
+      "ratio": 174.60437158469946
+    }
+  ],
+  "runs": [
+    {
+      "model": "mobilenetv2_full_finetune",
+      "run": 1,
+      "seed": 0,
+      "n_correct": 9881,
+      "n_test": 10000,
+      "accuracy_percent": 98.81,
+      "train_seconds": 601.3869531,
+      "inference_seconds": 6.307138723999742,
+      "trainable_parameters": 2236682,
+      "total_parameters": 2236682,
+      "peak_gpu_memory_allocated_gib": 7.392,
+      "peak_gpu_memory_reserved_gib": 8.221,
+      "epoch_seconds": "200.0283;200.6362;200.7217",
+      "epoch_mean_loss": "0.069894;0.036438;0.029594"
+    },
+    {
+      "model": "mobilenetv2_full_finetune",
+      "run": 2,
+      "seed": 1,
+      "n_correct": 9923,
+      "n_test": 10000,
+      "accuracy_percent": 99.23,
+      "train_seconds": 603.9631561509996,
+      "inference_seconds": 6.491523046999646,
+      "trainable_parameters": 2236682,
+      "total_parameters": 2236682,
+      "peak_gpu_memory_allocated_gib": 7.392,
+      "peak_gpu_memory_reserved_gib": 8.221,
+      "epoch_seconds": "200.7864;201.5535;201.6232",
+      "epoch_mean_loss": "0.071171;0.035512;0.027542"
+    },
+    {
+      "model": "mobilenetv2_full_finetune",
+      "run": 3,
+      "seed": 2,
+      "n_correct": 9905,
+      "n_test": 10000,
+      "accuracy_percent": 99.05,
+      "train_seconds": 604.832673257999,
+      "inference_seconds": 6.473702847000823,
+      "trainable_parameters": 2236682,
+      "total_parameters": 2236682,
+      "peak_gpu_memory_allocated_gib": 7.392,
+      "peak_gpu_memory_reserved_gib": 8.221,
+      "epoch_seconds": "201.0445;201.7489;202.0390",
+      "epoch_mean_loss": "0.071819;0.039310;0.029989"
+    }
+  ]
+}
