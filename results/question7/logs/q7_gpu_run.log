@@ -1,0 +1,65 @@
+PyTorch 2.15.0+rocm7.14 | HIP 7.14.60850 | cuda:0 = AMD Radeon RX 9070 XT (gfx1201, 15.9 GiB)
+=== mobilenetv2_partial_finetune_last3: 3 run(s), epochs=3, batch=100, lr=0.001; trainable 1,218,890 / 2,236,682 parameters; unfrozen: features[16], features[17], features[18], classifier[1]
+  Epoch [1/3], Step[100/600], Loss: 0.0216
+  Epoch [1/3], Step[200/600], Loss: 0.1210
+  Epoch [1/3], Step[300/600], Loss: 0.0146
+  Epoch [1/3], Step[400/600], Loss: 0.0557
+  Epoch [1/3], Step[500/600], Loss: 0.0987
+  Epoch [1/3], Step[600/600], Loss: 0.0394
+  Epoch [2/3], Step[100/600], Loss: 0.0283
+  Epoch [2/3], Step[200/600], Loss: 0.0154
+  Epoch [2/3], Step[300/600], Loss: 0.0096
+  Epoch [2/3], Step[400/600], Loss: 0.0054
+  Epoch [2/3], Step[500/600], Loss: 0.0358
+  Epoch [2/3], Step[600/600], Loss: 0.0117
+  Epoch [3/3], Step[100/600], Loss: 0.0118
+  Epoch [3/3], Step[200/600], Loss: 0.0028
+  Epoch [3/3], Step[300/600], Loss: 0.0180
+  Epoch [3/3], Step[400/600], Loss: 0.0189
+  Epoch [3/3], Step[500/600], Loss: 0.0292
+  Epoch [3/3], Step[600/600], Loss: 0.0145
+  run 1 (seed 0): acc=98.74%  train=127.67s  inference=6.585s  peak GPU memory 1.05 GiB allocated / 1.44 GiB reserved
+  Epoch [1/3], Step[100/600], Loss: 0.0666
+  Epoch [1/3], Step[200/600], Loss: 0.0683
+  Epoch [1/3], Step[300/600], Loss: 0.0418
+  Epoch [1/3], Step[400/600], Loss: 0.0610
+  Epoch [1/3], Step[500/600], Loss: 0.0081
+  Epoch [1/3], Step[600/600], Loss: 0.0275
+  Epoch [2/3], Step[100/600], Loss: 0.0515
+  Epoch [2/3], Step[200/600], Loss: 0.0807
+  Epoch [2/3], Step[300/600], Loss: 0.0166
+  Epoch [2/3], Step[400/600], Loss: 0.0780
+  Epoch [2/3], Step[500/600], Loss: 0.0118
+  Epoch [2/3], Step[600/600], Loss: 0.0327
+  Epoch [3/3], Step[100/600], Loss: 0.0142
+  Epoch [3/3], Step[200/600], Loss: 0.0045
+  Epoch [3/3], Step[300/600], Loss: 0.0182
+  Epoch [3/3], Step[400/600], Loss: 0.0204
+  Epoch [3/3], Step[500/600], Loss: 0.0117
+  Epoch [3/3], Step[600/600], Loss: 0.0376
+  run 2 (seed 1): acc=99.09%  train=128.15s  inference=6.384s  peak GPU memory 1.05 GiB allocated / 1.44 GiB reserved
+  Epoch [1/3], Step[100/600], Loss: 0.1232
+  Epoch [1/3], Step[200/600], Loss: 0.1009
+  Epoch [1/3], Step[300/600], Loss: 0.0509
+  Epoch [1/3], Step[400/600], Loss: 0.1228
+  Epoch [1/3], Step[500/600], Loss: 0.0870
+  Epoch [1/3], Step[600/600], Loss: 0.0693
+  Epoch [2/3], Step[100/600], Loss: 0.1196
+  Epoch [2/3], Step[200/600], Loss: 0.0450
+  Epoch [2/3], Step[300/600], Loss: 0.0119
+  Epoch [2/3], Step[400/600], Loss: 0.0580
+  Epoch [2/3], Step[500/600], Loss: 0.0045
+  Epoch [2/3], Step[600/600], Loss: 0.0319
+  Epoch [3/3], Step[100/600], Loss: 0.0010
+  Epoch [3/3], Step[200/600], Loss: 0.0198
+  Epoch [3/3], Step[300/600], Loss: 0.0021
+  Epoch [3/3], Step[400/600], Loss: 0.0006
+  Epoch [3/3], Step[500/600], Loss: 0.0241
+  Epoch [3/3], Step[600/600], Loss: 0.0024
+  run 3 (seed 2): acc=99.25%  train=124.88s  inference=6.508s  peak GPU memory 1.05 GiB allocated / 1.44 GiB reserved
+  => accuracy 99.03% ± 0.26 (sample SD, n=3); train 126.90s; inference 6.492s
+  vs q1_frozen: accuracy_percent +3.04 pp (ratio 1.032)
+  vs q1_frozen: train_seconds +6.54 s (ratio 1.054)
+  vs q6_full_finetune: accuracy_percent -0.00 pp (ratio 1.000)
+  vs q6_full_finetune: train_seconds -476.49 s (ratio 0.210)
+exit=0

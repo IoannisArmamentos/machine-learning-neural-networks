@@ -114,6 +114,27 @@ def build_mobilenet_v2_full_finetune(weights=models.MobileNet_V2_Weights.IMAGENE
     return model
 
 
+# Question 7: "the last 3 layers of the pretrained network" = the last three top-level modules of
+# model.features: features[16] (InvertedResidual 160->160), features[17] (InvertedResidual 160->320)
+# and features[18] (Conv2dNormActivation 1x1 320->1280). The new classifier is also trained.
+PARTIAL_FT_FEATURE_INDICES = (16, 17, 18)
+
+
+def build_mobilenet_v2_partial_finetune(weights=models.MobileNet_V2_Weights.IMAGENET1K_V1,
+                                        trainable_features=PARTIAL_FT_FEATURE_INDICES) -> nn.Module:
+    """Question 7: identical to build_mobilenet_v2_frozen (same weights, freezing, classifier[1]
+    replacement, so the same initial weights for the same seed), then only the selected feature
+    modules are unfrozen. `weights=None` builds the identical architecture without downloading."""
+    model = models.mobilenet_v2(weights=weights)
+    for param in model.features.parameters():
+        param.requires_grad = False
+    model.classifier[1] = nn.Linear(model.classifier[1].in_features, 10)
+    for i in trainable_features:
+        for param in model.features[i].parameters():
+            param.requires_grad = True
+    return model
+
+
 def _flatten(images: torch.Tensor) -> torch.Tensor:
     return images.reshape(-1, 28 * 28)
 
@@ -163,3 +184,8 @@ def dropout_mlp_spec(hidden_size: int, dropout: float) -> ModelSpec:
 MOBILENET_FULL_FT_SPEC = ModelSpec("mobilenetv2_full_finetune", build_mobilenet_v2_full_finetune,
                                    nn.CrossEntropyLoss, epochs=3, transform="imagenet",
                                    prepare_input=_identity)
+
+# Question 7 model. Same training configuration as the original MobileNetV2 spec. Not part of MODEL_SPECS.
+MOBILENET_PARTIAL_FT_SPEC = ModelSpec("mobilenetv2_partial_finetune_last3", build_mobilenet_v2_partial_finetune,
+                                      nn.CrossEntropyLoss, epochs=3, transform="imagenet",
+                                      prepare_input=_identity)

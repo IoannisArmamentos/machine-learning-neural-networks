@@ -1,0 +1,130 @@
+{
+  "question": 7,
+  "model": "mobilenetv2_partial_finetune_last3",
+  "smoke": false,
+  "device": "gpu",
+  "interpretation": "'The last 3 layers of the pretrained network' = the last three top-level modules of model.features (features[16], features[17], features[18]). Each top-level entry of torchvision's model.features is one layer unit of the network (the first conv, 17 inverted-residual bottleneck blocks, the final 1x1 conv); this reading includes the true final layer and keeps each bottleneck block whole. The new 10-class classifier is trained as well, as in every MobileNetV2 variant of the assignment.",
+  "unfrozen_feature_indices": [
+    16,
+    17,
+    18
+  ],
+  "unfrozen_layers": [
+    {
+      "module": "features[16]",
+      "type": "InvertedResidual",
+      "parameters": 320000,
+      "all_trainable": true
+    },
+    {
+      "module": "features[17]",
+      "type": "InvertedResidual",
+      "parameters": 473920,
+      "all_trainable": true
+    },
+    {
+      "module": "features[18]",
+      "type": "Conv2dNormActivation",
+      "parameters": 412160,
+      "all_trainable": true
+    },
+    {
+      "module": "classifier[1]",
+      "type": "Linear",
+      "parameters": 12810,
+      "all_trainable": true
+    }
+  ],
+  "rejected_interpretations": {
+    "last_3_inverted_residual_blocks": {
+      "modules": "features[15], features[16], features[17]",
+      "pretrained_parameters": 1113920,
+      "rejected_because": "leaves the actual last layer features[18] frozen"
+    },
+    "last_3_parameterised_leaf_ops": {
+      "modules": "features[17].conv[3] (BN), features[18][0] (Conv), features[18][1] (BN)",
+      "pretrained_parameters": 412800,
+      "rejected_because": "splits an inverted-residual block and counts BatchNorm as a layer"
+    }
+  },
+  "change_vs_question1": "after freezing model.features (as in Q1), requires_grad=True for features[16], features[17], features[18]; everything else identical",
+  "batchnorm": "model.train() during training, as in the original script: running mean/variance of every BatchNorm layer (frozen or not) are updated; frozen layers keep their weights and biases",
+  "pretrained_weights": "torchvision MobileNet_V2_Weights.IMAGENET1K_V1 (same as Question 1)",
+  "classifier": "classifier[1] replaced by Linear(1280, 10) after seeding (same as Question 1)",
+  "preprocessing": "Resize((224, 224)) -> Grayscale(num_output_channels=3) -> ToTensor() -> Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])",
+  "hyperparameters": {
+    "epochs": 3,
+    "batch_size": 100,
+    "learning_rate": 0.001,
+    "optimizer": "Adam (all model parameters; frozen ones receive no gradient and are not updated)",
+    "loss": "CrossEntropyLoss"
+  },
+  "parameters": {
+    "question7": {
+      "total": 2236682,
+      "trainable": 1218890,
+      "frozen": 1017792,
+      "features_total": 2223872,
+      "features_trainable": 1206080,
+      "classifier_trainable": 12810
+    },
+    "question1": {
+      "total": 2236682,
+      "trainable": 12810,
+      "frozen": 2223872,
+      "features_total": 2223872,
+      "features_trainable": 0,
+      "classifier_trainable": 12810
+    },
+    "question6": {
+      "total": 2236682,
+      "trainable": 2236682,
+      "frozen": 0,
+      "features_total": 2223872,
+      "features_trainable": 2223872,
+      "classifier_trainable": 12810
+    }
+  },
+  "protocol": {
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "warmup_batches": 20,
+    "num_workers": 0,
+    "max_train_batches_per_epoch": null,
+    "max_test_batches": null,
+    "mixed_precision": false,
+    "gradient_accumulation": false,
+    "std_note": "std_sample uses ddof=1 (n-1)"
+  },
+  "timing_definitions": {
+    "train_seconds": "All epochs: DataLoader iteration (incl. CPU transforms), host->device copies (no-op on CPU), forward/backward/step. Excludes dataset loading and model construction. Device synchronized at start and end (no-op on CPU).",
+    "inference_seconds": "Full pass over the test set: DataLoader iteration, host->device copies, forward, argmax. Excludes copying predictions to CPU and accuracy computation. Device synchronized at start and end (no-op on CPU)."
+  },
+  "environment": {
+    "cpu": "AMD Ryzen 9 7900X 12-Core Processor",
+    "python": "3.14.4",
+    "pytorch": "2.15.0+rocm7.14",
+    "hip": "7.14.60850",
+    "cuda": null,
+    "gpu": "AMD Radeon RX 9070 XT",
+    "gpu_visible_to_pytorch": true,
+    "torch_num_threads": 12,
+    "torch_num_interop_threads": 24,
+    "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.43",
+    "gpu_arch": "gfx1201",
+    "gpu_total_memory_gib": 15.92
+  },
+  "baselines": {
+    "q1_frozen": {
+      "path": "results/question1/mobilenetv2/summary.json",
+      "sha256": "3c8493d43ab9b23113556de11605a23e2164acbb522bc5cb90685133d1dfa53b"
+    },
+    "q6_full_finetune": {
+      "path": "results/question6/summary.json",
+      "sha256": "c0f0ffec3cd3aa7521b6c34883bab0674853ea9654fc07ed22645cd7635375b5"
+    }
+  }
+}
