@@ -1,0 +1,61 @@
+{
+  "question": 8,
+  "created": "2026-11-05T11:30:55",
+  "ranking": [
+    "q6_mobilenetv2_full",
+    "q7_mobilenetv2_last3",
+    "q1_cnn",
+    "q4_enhanced_mlp",
+    "q5_tuned_mlp",
+    "q1_mlp",
+    "q1_mobilenetv2_frozen"
+  ],
+  "highest_mean_accuracy": "q6_mobilenetv2_full",
+  "second_highest_mean_accuracy": "q7_mobilenetv2_last3",
+  "fastest_training": "q5_tuned_mlp",
+  "fastest_inference": "q5_tuned_mlp",
+  "accuracy_training_time_pareto_front": [
+    "q5_tuned_mlp",
+    "q1_cnn",
+    "q7_mobilenetv2_last3",
+    "q6_mobilenetv2_full"
+  ],
+  "mcnemar_primary_p_value": 0.6464833446153442,
+  "gpu_vs_cpu_question2": [
+    {
+      "model": "mlp",
+      "cpu_train_seconds": "8.575775061999593",
+      "gpu_train_seconds_mean": "9.659884514333498",
+      "train_speedup": "0.8877720069297634",
+      "cpu_inference_seconds": "0.24309102200004418",
+      "gpu_inference_seconds_mean": "0.2739205806665268",
+      "inference_speedup": "0.8874507399500048"
+    },
+    {
+      "model": "cnn",
+      "cpu_train_seconds": "32.592559746000006",
+      "gpu_train_seconds_mean": "9.53949021766645",
+      "train_speedup": "3.4165934449663706",
+      "cpu_inference_seconds": "0.4235409009997966",
+      "gpu_inference_seconds_mean": "0.2567114863331881",
+      "inference_speedup": "1.6498712505995121"
+    },
+    {
+      "model": "mobilenetv2",
+      "cpu_train_seconds": "2745.0997269070012",
+      "gpu_train_seconds_mean": "120.35984500233342",
+      "train_speedup": "22.80743820211618",
+      "cpu_inference_seconds": "143.7110502760006",
+      "gpu_inference_seconds_mean": "6.388446165999994",
+      "inference_speedup": "22.495462361543634"
+    }
+  ],
+  "question5_validation_only_selection": {
+    "passed": true,
+    "grid_has_25_configs": true,
+    "grid_has_no_test_columns": true,
+    "validation_size_6000_train_54000": true,
+    "winner_is_validation_argmax": true,
+    "selection_logged_before_test_phase": true
+  }
+}

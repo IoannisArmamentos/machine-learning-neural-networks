@@ -1,0 +1,102 @@
+{
+  "question": 8,
+  "alpha": 0.05,
+  "primary_seed": 0,
+  "selection_rule": "The two configurations with the highest mean test accuracy over their 3 GPU runs (ties: fewer trainable parameters, then fixed configuration order) are compared with an exact two-sided McNemar test on their seed-0 runs (run 1 of every configuration), paired by original MNIST test index. Seeds 1 and 2 are reported separately as a sensitivity check; runs are never pooled. Significance level alpha = 0.05. The rule was fixed before computing the test.",
+  "ranking_rule": "mean test accuracy over 3 GPU runs (exact total correct), then fewer trainable parameters, then fixed configuration order (Q1 MLP, Q1 CNN, Q1 MobileNetV2, Q4, Q5, Q6, Q7)",
+  "pareto_rule": "not dominated by any configuration with higher-or-equal mean accuracy and lower-or-equal mean training time (at least one strictly better)",
+  "no_training_or_inference": true,
+  "reference_labels": "torchvision MNIST test targets (data/MNIST)",
+  "configurations": [
+    {
+      "key": "q1_mlp",
+      "label": "Q1 MLP (original)",
+      "question": 1,
+      "description": "MLP 784-100-10, ReLU; original script",
+      "runs_csv": "results/question1/mlp/runs.csv"
+    },
+    {
+      "key": "q1_cnn",
+      "label": "Q1 CNN (original)",
+      "question": 1,
+      "description": "CNN: Conv 32, Conv 64 (3x3), max-pool, Linear 1600-10; original script",
+      "runs_csv": "results/question1/cnn/runs.csv"
+    },
+    {
+      "key": "q1_mobilenetv2_frozen",
+      "label": "Q1 MobileNetV2, frozen",
+      "question": 1,
+      "description": "ImageNet MobileNetV2, frozen features, new 10-class classifier trained; original script",
+      "runs_csv": "results/question1/mobilenetv2/runs.csv"
+    },
+    {
+      "key": "q4_enhanced_mlp",
+      "label": "Q4 MLP 500-200, dropout",
+      "question": 4,
+      "description": "MLP 784-500-200-10, ReLU + Dropout(0.2) after each hidden layer",
+      "runs_csv": "results/question4/runs.csv"
+    },
+    {
+      "key": "q5_tuned_mlp",
+      "label": "Q5 MLP 800, dropout 0.2",
+      "question": 5,
+      "description": "MLP 784-800-10, ReLU + Dropout(0.2); hidden size and dropout chosen on a validation set",
+      "runs_csv": "results/question5/final_runs.csv"
+    },
+    {
+      "key": "q6_mobilenetv2_full",
+      "label": "Q6 MobileNetV2, full FT",
+      "question": 6,
+      "description": "ImageNet MobileNetV2, all layers fine-tuned",
+      "runs_csv": "results/question6/runs.csv"
+    },
+    {
+      "key": "q7_mobilenetv2_last3",
+      "label": "Q7 MobileNetV2, last 3 FT",
+      "question": 7,
+      "description": "ImageNet MobileNetV2, features[16..18] + classifier fine-tuned",
+      "runs_csv": "results/question7/runs.csv"
+    }
+  ],
+  "input_sha256": {
+    "results/question1/mlp/runs.csv": "6272fead8676c91e02979d15cd644ded3d1e1d19a4a49a7f92f1cc9dca201715",
+    "results/question1/mlp/summary.json": "e23ef6f9e3ad818020410913064700f1f904346d6b0e0af31f35d36e27bb5ac4",
+    "results/question1/mlp/predictions_run1_seed0.csv": "565e33c162dd2e74c2b0f9ac33abf6be21805b5b7ec3657488d24c694ce4c98e",
+    "results/question1/mlp/predictions_run2_seed1.csv": "9f0a494c65459b0cddd4228780088b92c1c5d946ebfcc2f1b0f035aa212ab8f3",
+    "results/question1/mlp/predictions_run3_seed2.csv": "b0e775db31cab874a2cf2d0424d96e6c4ec9ae1ac7d78b13e0cc70f0d7cc115e",
+    "results/question1/cnn/runs.csv": "006872f65b41ab52266c6e666c1a0cc9c8d99a2f2891562e7ee53b3ddae11f9f",
+    "results/question1/cnn/summary.json": "80688edd7b979bf050aa4b943fa37641efa050f38a132c5920c914410611edf2",
+    "results/question1/cnn/predictions_run1_seed0.csv": "f55d59b22ae58360866c1c40597d91e882fb08fb3d5eafa6b941ec9aba00bc74",
+    "results/question1/cnn/predictions_run2_seed1.csv": "28f15b065032cc40322de5677c295df69cdb6ab92f3d450fd7603730b5984d3c",
+    "results/question1/cnn/predictions_run3_seed2.csv": "4335fbfbc0c7866990d32c3b002881f6638b812977192662b8e839f86838947d",
+    "results/question1/mobilenetv2/runs.csv": "061e1f5d70f0a641d74e8e7df307b651403a43fefadd00b71dafdf45f5f1591f",
+    "results/question1/mobilenetv2/summary.json": "3c8493d43ab9b23113556de11605a23e2164acbb522bc5cb90685133d1dfa53b",
+    "results/question1/mobilenetv2/predictions_run1_seed0.csv": "f990c22f794f5d394614a9abf7f5b5ebd2194788dc4f871db6aa7f303d555af9",
+    "results/question1/mobilenetv2/predictions_run2_seed1.csv": "6f551e59efd97f8e7d05fe03c35aaf19bc5a173a1ff81016ba8ac54bcb0e2b14",
+    "results/question1/mobilenetv2/predictions_run3_seed2.csv": "680d008de106bb0d3f5630317da419d0c576cad7ae30a889e8c63029a17afceb",
+    "results/question4/runs.csv": "0b3c25cabdc7909a82c59c1da58588b76c32c5daab8138e42068b352905c25f5",
+    "results/question4/summary.json": "b43cbabda3168b64ee7b792052590b6d630a08e9559b76662711a9e32c806c66",
+    "results/question4/predictions_run1_seed0.csv": "78bf931c14a41ed1aa49eb5d62a39cc87ca34258fbedf9ba06fcc06f4c2bd5b3",
+    "results/question4/predictions_run2_seed1.csv": "eb405f8b4f1abd950db692cf916aa256545f1953af50914545a8919f86e23df2",
+    "results/question4/predictions_run3_seed2.csv": "9a6aa0d6da3ae5ab5268cbb49d8d1ab6857d94e0d565f36c96e728cdcaaffaf3",
+    "results/question5/final_runs.csv": "d595fb76c7c8b35095e36f27104ae98aa64cc4119ce823fad0d24a60ed32cc4f",
+    "results/question5/summary.json": "892169d6b2af111b0b60b5d2522015de619960a880c31aa3d5481f68f18ec853",
+    "results/question5/predictions_final_run1_seed0.csv": "58b970fa095372507f8a099ed24b10f9ec32dc2785f8a278c0971fa76533483b",
+    "results/question5/predictions_final_run2_seed1.csv": "7a903129c60fb8dd2951ac1efacecbb8ac784df187337d73c23afc09dd92da7e",
+    "results/question5/predictions_final_run3_seed2.csv": "45e48e8e0d77d697c091e9276c4fdac2f2a2bbc02d28c05f4f8061cf5f17e3db",
+    "results/question6/runs.csv": "d8d25f446302f749065ac08d56d5183cc7d8c580cbd3e81dfd82eaa134437e10",
+    "results/question6/summary.json": "c0f0ffec3cd3aa7521b6c34883bab0674853ea9654fc07ed22645cd7635375b5",
+    "results/question6/predictions_run1_seed0.csv": "23d71264dbba998d38c3e329dad091a85ad7fc124b15f92e2455cdd9d8e91ba1",
+    "results/question6/predictions_run2_seed1.csv": "c41b3f2cbe93625360d3e5ef40f932267e731275de1da79b171bd007865fc37f",
+    "results/question6/predictions_run3_seed2.csv": "7bac78dc597bc2413fdb6a2fb7004cf6a6bcd76471bb8e46133fd2d03cbcaf13",
+    "results/question7/runs.csv": "16b553176bde4460a2f1874a4375b2bf145da40917821f30db05ae179d488ea9",
+    "results/question7/summary.json": "7d3171f80b8eb9bc26d58feffc3c16ae6fa30825cdccf5e78f5c23584c003631",
+    "results/question7/predictions_run1_seed0.csv": "95b7e97775d6179efc8d271672158e890e6bd80dda9e17d3365a690355c4fade",
+    "results/question7/predictions_run2_seed1.csv": "e12704093c77f43c8a1a7f1fa92545e900a795a20575932d2d1f2935d6ad4143",
+    "results/question7/predictions_run3_seed2.csv": "dd92aa184acbdfd9007faf757f7bda4e19bab5e5bb1e1f43452be8aea6c24daf",
+    "results/question2/cpu_gpu_comparison.csv": "e3f5103e416100ccc6126a40308492179ab672591b435c0eb99f0721bd2d1ad5",
+    "results/question5/validation_grid.csv": "629dcb2c3e513c28432fa0de0135e596b95fd1216cca35b4f5bb0e5e39cf8ed0",
+    "results/question5/best_config.json": "444e7046af3b5aa6f21b17f075f5a9d7cb83d5b8aecf52a783cb51a06b2b2be9",
+    "results/question5/logs/q5_run.log": "d74443e0ddae755a10bd7c899788f49c1dc0ba86c7c6e05297399b6571708edf"
+  }
+}
