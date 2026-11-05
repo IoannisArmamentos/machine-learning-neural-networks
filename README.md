@@ -24,7 +24,7 @@ All three use mini-batch size 100, learning rate 0.001, Adam and cross-entropy (
 4. New MLP with two hidden layers (500 and 200, ReLU, dropout 0.2). **Done.**
 5. Original MLP with dropout: choose the dropout probability and hidden size on a 10% validation set. **Done.**
 6. MobileNetV2 with the whole pretrained network fine-tuned. **Done.**
-7. MobileNetV2 with only the last 3 pretrained layers fine-tuned.
+7. MobileNetV2 with only the last 3 pretrained layers fine-tuned. **Done.**
 8. Summary table of all experiments, best model, statistical significance and the usefulness of the GPU.
 
 ## Setup
@@ -57,15 +57,18 @@ python q4_enhanced_mlp.py
 python q5_mlp_hyperparameter_search.py
 # Question 6: MobileNetV2 with full fine-tuning, 3 GPU runs (seeds 0, 1, 2), ~31 min
 python q6_mobilenet_full_finetune.py
-# Quick pipeline check of the Question 1/2/4/5/6 scripts (truncated runs, written to results/smoke/, not tracked)
+# Question 7: MobileNetV2 with the last 3 feature layers fine-tuned, 3 GPU runs (seeds 0, 1, 2), ~7 min
+python q7_mobilenet_partial_finetune.py
+# Quick pipeline check of the Question 1/2/4/5/6/7 scripts (truncated runs, written to results/smoke/, not tracked)
 python q1_gpu_baseline.py --model all --smoke
 python q2_cpu_comparison.py --model all --smoke
 python q4_enhanced_mlp.py --smoke
 python q5_mlp_hyperparameter_search.py --smoke
 python q6_mobilenet_full_finetune.py --smoke
+python q7_mobilenet_partial_finetune.py --smoke
 ```
 
-Both scripts accept `--model mlp cnn mobilenetv2`, `--warmup-batches` (default 20), `--num-workers` (default 0, as in the original scripts), `--out` and `--overwrite`. They refuse to replace existing results without `--overwrite`. `q2_cpu_comparison.py` reads the Question 1 results as its GPU baseline and never writes to them. `q3_misclassification_analysis.py` (`--run 1`, `--per-digit 6`, `--top-pairs 5`, `--out`, `--overwrite`) only reads the Question 1 prediction files and the MNIST test images. `q4_enhanced_mlp.py` (`--seeds`, `--warmup-batches`, `--num-workers`, `--out`, `--overwrite`) reads the Question 1 MLP results as its baseline and refuses to run with a different protocol. `q5_mlp_hyperparameter_search.py` (`--seeds`, `--warmup-batches`, `--num-workers`, `--out`, `--overwrite`) reads the Question 1 and Question 4 results as baselines. `q6_mobilenet_full_finetune.py` (`--seeds`, `--warmup-batches`, `--num-workers`, `--out`, `--overwrite`) reads the Question 1 MobileNetV2 results as its baseline and refuses to run with a different protocol or training configuration.
+Both scripts accept `--model mlp cnn mobilenetv2`, `--warmup-batches` (default 20), `--num-workers` (default 0, as in the original scripts), `--out` and `--overwrite`. They refuse to replace existing results without `--overwrite`. `q2_cpu_comparison.py` reads the Question 1 results as its GPU baseline and never writes to them. `q3_misclassification_analysis.py` (`--run 1`, `--per-digit 6`, `--top-pairs 5`, `--out`, `--overwrite`) only reads the Question 1 prediction files and the MNIST test images. `q4_enhanced_mlp.py` (`--seeds`, `--warmup-batches`, `--num-workers`, `--out`, `--overwrite`) reads the Question 1 MLP results as its baseline and refuses to run with a different protocol. `q5_mlp_hyperparameter_search.py` (`--seeds`, `--warmup-batches`, `--num-workers`, `--out`, `--overwrite`) reads the Question 1 and Question 4 results as baselines. `q6_mobilenet_full_finetune.py` (`--seeds`, `--warmup-batches`, `--num-workers`, `--out`, `--overwrite`) reads the Question 1 MobileNetV2 results as its baseline and refuses to run with a different protocol or training configuration. `q7_mobilenet_partial_finetune.py` (same options) reads the Question 1 and Question 6 MobileNetV2 results as baselines.
 
 ## Results
 
@@ -145,6 +148,20 @@ Full fine-tuning reduces test errors from about 401 to about 97 per 10,000 image
 
 Details: [`results/question6/SUMMARY.md`](results/question6/SUMMARY.md)
 
+### Question 7: MobileNetV2 with the last 3 layers fine-tuned, 3 GPU runs, compared with Questions 1 and 6
+
+"The last 3 layers of the pretrained network" are the last three top-level modules of `model.features`: `features[16]` and `features[17]` (`InvertedResidual` blocks) and `features[18]` (final 1×1 Conv-BatchNorm-ReLU6). They are trained together with the 10-class classifier: 1,218,890 of 2,236,682 parameters (54.5%). `features[0]`–`features[15]` stay frozen. Everything else is the same as in Question 1.
+
+| Model | Trainable parameters | Accuracy (mean ± sample SD) | Training (s) | Inference (s) |
+|---|---|---|---|---|
+| Frozen features (Question 1) | 12,810 | 95.99 ± 0.18 % | 120.36 | 6.388 |
+| Last 3 layers + classifier (Question 7) | 1,218,890 | 99.03 ± 0.26 % | 126.90 | 6.492 |
+| Full fine-tuning (Question 6) | 2,236,682 | 99.03 ± 0.21 % | 603.39 | 6.424 |
+
+Partial fine-tuning is 3.04 percentage points more accurate than the frozen model. Its observed mean accuracy is nearly identical to full fine-tuning (difference −0.003 percentage points, well within the run-to-run variation); with 3 runs per model this is not a proof of statistical equivalence. It trains 4.8 times faster than full fine-tuning (×0.210) and only 5.4% slower than the frozen model. Peak GPU memory was 1.05 GiB, compared with 7.39 GiB for full fine-tuning.
+
+Details: [`results/question7/SUMMARY.md`](results/question7/SUMMARY.md)
+
 ## Methodology
 
 - Training time covers all epochs, including data loading. Inference time covers one full pass over the test set. Dataset loading and model construction are excluded.
@@ -156,6 +173,7 @@ Details: [`results/question6/SUMMARY.md`](results/question6/SUMMARY.md)
 - For Question 4, the enhanced MLP uses the same seeds, warm-up, timing and training configuration as the Question 1 MLP. Dropout is active only in training mode.
 - For Question 5, the split uses `random_split` with a fixed seed and is the same for all 25 configurations. The selection uses validation accuracy only, with ties broken by fewer hidden neurons, then by lower dropout. The test set is not loaded until the winner has been written to `best_config.json`.
 - For Question 6, each run builds a fresh pretrained MobileNetV2 and replaces the classifier after seeding, so its starting weights equal those of the Question 1 run with the same seed. Every parameter has `requires_grad=True`.
+- For Question 7, each run freezes `model.features` and replaces the classifier as in Question 1, then unfreezes `features[16]`, `features[17]` and `features[18]`. Frozen parameters receive no gradients. As in the original script, `model.train()` also updates the BatchNorm statistics of frozen layers.
 
 Changes compared with the original scripts: none to architectures, hyperparameters, loss, optimiser, transforms or data loaders. The harness adds timing, seeding, repetition, warm-up and result files. The test loader also returns each image's index. MobileNetV2's per-epoch loss is accumulated on the device instead of with a per-step `.item()` call.
 
@@ -167,15 +185,15 @@ Differences between the PDF and the code: the PDF lists the CNN as conv → pool
 python -m unittest discover -s tests -t . -v
 ```
 
-87 unit tests cover timing, aggregation, prediction files, model fidelity, speedup calculation, baseline validation, CPU-only enforcement, misclassification counting, confusion pairs, index alignment, common errors, figure generation, the enhanced MLP architecture, dropout behaviour, baseline comparison, the hyperparameter grid, the validation split, winner selection, protection against test-set leakage, the trainable layers and parameter counts of the fine-tuned MobileNetV2, and preservation of its preprocessing and training configuration. They use synthetic data on the CPU: no GPU, no MNIST download, no pretrained weights. GitHub Actions (`.github/workflows/python-tests.yml`) runs them with CPU-only PyTorch on every pull request and push to `master`.
+99 unit tests cover timing, aggregation, prediction files, model fidelity, speedup calculation, baseline validation, CPU-only enforcement, misclassification counting, confusion pairs, index alignment, common errors, figure generation, the enhanced MLP architecture, dropout behaviour, baseline comparison, the hyperparameter grid, the validation split, winner selection, protection against test-set leakage, the trainable layers and parameter counts of the fine-tuned MobileNetV2, preservation of its preprocessing and training configuration, and the layers selected for partial fine-tuning, with no gradients for frozen parameters. They use synthetic data on the CPU: no GPU, no MNIST download, no pretrained weights. GitHub Actions (`.github/workflows/python-tests.yml`) runs them with CPU-only PyTorch on every pull request and push to `master`.
 
 ## Directories
 
 - `mnist_*.py`: the original scripts (unchanged).
 - `a2/`: shared code (`models`, `data`, `timing`, `experiment`, `stats`, `io_utils`, `environment`, `compare`, `misclassification`, `figures`, `search`).
-- `q1_gpu_baseline.py`, `q2_cpu_comparison.py`, `q3_misclassification_analysis.py`, `q4_enhanced_mlp.py`, `q5_mlp_hyperparameter_search.py`, `q6_mobilenet_full_finetune.py`: scripts for Questions 1–6.
+- `q1_gpu_baseline.py`, `q2_cpu_comparison.py`, `q3_misclassification_analysis.py`, `q4_enhanced_mlp.py`, `q5_mlp_hyperparameter_search.py`, `q6_mobilenet_full_finetune.py`, `q7_mobilenet_partial_finetune.py`: scripts for Questions 1–7.
 - `tests/`: unit tests.
-- `results/question1/` to `results/question6/`: per-question CSV/JSON results, per-image predictions, logs, figures and `SUMMARY.md`.
+- `results/question1/` to `results/question7/`: per-question CSV/JSON results, per-image predictions, logs, figures and `SUMMARY.md`.
 - `docs/`: the assignment description (PDF).
 
 ---
@@ -204,7 +222,7 @@ python -m unittest discover -s tests -t . -v
 4. Νέο MLP με δύο κρυμμένα επίπεδα (500 και 200, ReLU, dropout 0.2). **Ολοκληρώθηκε.**
 5. Αρχικό MLP με dropout: επιλογή πιθανότητας dropout και διάστασης κρυμμένου επιπέδου με validation set 10%. **Ολοκληρώθηκε.**
 6. MobileNetV2 με fine-tuning ολόκληρου του προ-εκπαιδευμένου δικτύου. **Ολοκληρώθηκε.**
-7. MobileNetV2 με fine-tuning μόνο των 3 τελευταίων προ-εκπαιδευμένων επιπέδων.
+7. MobileNetV2 με fine-tuning μόνο των 3 τελευταίων προ-εκπαιδευμένων επιπέδων. **Ολοκληρώθηκε.**
 8. Συγκεντρωτικός πίνακας όλων των πειραμάτων, καλύτερο μοντέλο, στατιστική σημαντικότητα και χρησιμότητα της GPU.
 
 ## Εγκατάσταση
@@ -237,15 +255,18 @@ python q4_enhanced_mlp.py
 python q5_mlp_hyperparameter_search.py
 # Ερώτημα 6: MobileNetV2 με πλήρες fine-tuning, 3 εκτελέσεις σε GPU (seeds 0, 1, 2), ~31 λεπτά
 python q6_mobilenet_full_finetune.py
-# Γρήγορος έλεγχος της ροής για τα scripts των Ερωτημάτων 1/2/4/5/6 (περικομμένες εκτελέσεις, στο results/smoke/, εκτός αποθετηρίου)
+# Ερώτημα 7: MobileNetV2 με fine-tuning των 3 τελευταίων επιπέδων χαρακτηριστικών, 3 εκτελέσεις σε GPU (seeds 0, 1, 2), ~7 λεπτά
+python q7_mobilenet_partial_finetune.py
+# Γρήγορος έλεγχος της ροής για τα scripts των Ερωτημάτων 1/2/4/5/6/7 (περικομμένες εκτελέσεις, στο results/smoke/, εκτός αποθετηρίου)
 python q1_gpu_baseline.py --model all --smoke
 python q2_cpu_comparison.py --model all --smoke
 python q4_enhanced_mlp.py --smoke
 python q5_mlp_hyperparameter_search.py --smoke
 python q6_mobilenet_full_finetune.py --smoke
+python q7_mobilenet_partial_finetune.py --smoke
 ```
 
-Και τα δύο scripts δέχονται `--model mlp cnn mobilenetv2`, `--warmup-batches` (προεπιλογή 20), `--num-workers` (προεπιλογή 0, όπως στα αρχικά scripts), `--out` και `--overwrite`. Δεν αντικαθιστούν υπάρχοντα αποτελέσματα χωρίς `--overwrite`. Το `q2_cpu_comparison.py` διαβάζει τα αποτελέσματα του Ερωτήματος 1 ως GPU baseline και δεν γράφει ποτέ σε αυτά. Το `q3_misclassification_analysis.py` (`--run 1`, `--per-digit 6`, `--top-pairs 5`, `--out`, `--overwrite`) διαβάζει μόνο τα αρχεία προβλέψεων του Ερωτήματος 1 και τις εικόνες του MNIST test set. Το `q4_enhanced_mlp.py` (`--seeds`, `--warmup-batches`, `--num-workers`, `--out`, `--overwrite`) διαβάζει τα αποτελέσματα του MLP του Ερωτήματος 1 ως baseline και δεν εκτελείται αν το πρωτόκολλο διαφέρει. Το `q5_mlp_hyperparameter_search.py` (`--seeds`, `--warmup-batches`, `--num-workers`, `--out`, `--overwrite`) διαβάζει τα αποτελέσματα των Ερωτημάτων 1 και 4 ως baselines. Το `q6_mobilenet_full_finetune.py` (`--seeds`, `--warmup-batches`, `--num-workers`, `--out`, `--overwrite`) διαβάζει τα αποτελέσματα του MobileNetV2 του Ερωτήματος 1 ως baseline και δεν εκτελείται αν το πρωτόκολλο ή οι ρυθμίσεις εκπαίδευσης διαφέρουν.
+Και τα δύο scripts δέχονται `--model mlp cnn mobilenetv2`, `--warmup-batches` (προεπιλογή 20), `--num-workers` (προεπιλογή 0, όπως στα αρχικά scripts), `--out` και `--overwrite`. Δεν αντικαθιστούν υπάρχοντα αποτελέσματα χωρίς `--overwrite`. Το `q2_cpu_comparison.py` διαβάζει τα αποτελέσματα του Ερωτήματος 1 ως GPU baseline και δεν γράφει ποτέ σε αυτά. Το `q3_misclassification_analysis.py` (`--run 1`, `--per-digit 6`, `--top-pairs 5`, `--out`, `--overwrite`) διαβάζει μόνο τα αρχεία προβλέψεων του Ερωτήματος 1 και τις εικόνες του MNIST test set. Το `q4_enhanced_mlp.py` (`--seeds`, `--warmup-batches`, `--num-workers`, `--out`, `--overwrite`) διαβάζει τα αποτελέσματα του MLP του Ερωτήματος 1 ως baseline και δεν εκτελείται αν το πρωτόκολλο διαφέρει. Το `q5_mlp_hyperparameter_search.py` (`--seeds`, `--warmup-batches`, `--num-workers`, `--out`, `--overwrite`) διαβάζει τα αποτελέσματα των Ερωτημάτων 1 και 4 ως baselines. Το `q6_mobilenet_full_finetune.py` (`--seeds`, `--warmup-batches`, `--num-workers`, `--out`, `--overwrite`) διαβάζει τα αποτελέσματα του MobileNetV2 του Ερωτήματος 1 ως baseline και δεν εκτελείται αν το πρωτόκολλο ή οι ρυθμίσεις εκπαίδευσης διαφέρουν. Το `q7_mobilenet_partial_finetune.py` (ίδιες επιλογές) διαβάζει τα αποτελέσματα του MobileNetV2 των Ερωτημάτων 1 και 6 ως baselines.
 
 ## Αποτελέσματα
 
@@ -325,6 +346,20 @@ python q6_mobilenet_full_finetune.py --smoke
 
 Λεπτομέρειες: [`results/question6/SUMMARY.md`](results/question6/SUMMARY.md)
 
+### Ερώτημα 7: MobileNetV2 με fine-tuning των 3 τελευταίων επιπέδων, 3 εκτελέσεις σε GPU, σε σύγκριση με τα Ερωτήματα 1 και 6
+
+«Τα 3 τελευταία επίπεδα του προ-εκπαιδευμένου δικτύου» είναι τα τρία τελευταία modules πρώτου επιπέδου του `model.features`: τα `features[16]` και `features[17]` (blocks `InvertedResidual`) και το `features[18]` (τελικό 1×1 Conv-BatchNorm-ReLU6). Εκπαιδεύονται μαζί με τον classifier 10 κλάσεων: 1.218.890 από 2.236.682 παραμέτρους (54,5%). Τα `features[0]`–`features[15]` παραμένουν παγωμένα. Όλα τα υπόλοιπα είναι ίδια με το Ερώτημα 1.
+
+| Μοντέλο | Εκπαιδεύσιμες παράμετροι | Accuracy (μέσος όρος ± δειγματική τυπική απόκλιση) | Εκπαίδευση (s) | Εφαρμογή (s) |
+|---|---|---|---|---|
+| Παγωμένα χαρακτηριστικά (Ερώτημα 1) | 12.810 | 95,99 ± 0,18 % | 120,36 | 6,388 |
+| 3 τελευταία επίπεδα + classifier (Ερώτημα 7) | 1.218.890 | 99,03 ± 0,26 % | 126,90 | 6,492 |
+| Πλήρες fine-tuning (Ερώτημα 6) | 2.236.682 | 99,03 ± 0,21 % | 603,39 | 6,424 |
+
+Το μερικό fine-tuning είναι 3,04 ποσοστιαίες μονάδες ακριβέστερο από το παγωμένο μοντέλο. Η παρατηρούμενη μέση ακρίβειά του είναι σχεδόν ίδια με αυτή του πλήρους fine-tuning (διαφορά −0,003 ποσοστιαίες μονάδες, πολύ μικρότερη από τη διακύμανση μεταξύ εκτελέσεων)· με 3 εκτελέσεις ανά μοντέλο αυτό δεν αποτελεί απόδειξη στατιστικής ισοδυναμίας. Εκπαιδεύεται 4,8 φορές ταχύτερα από το πλήρες fine-tuning (×0,210) και μόλις 5,4% πιο αργά από το παγωμένο μοντέλο. Η μέγιστη χρήση μνήμης GPU ήταν 1,05 GiB, έναντι 7,39 GiB στο πλήρες fine-tuning.
+
+Λεπτομέρειες: [`results/question7/SUMMARY.md`](results/question7/SUMMARY.md)
+
 ## Μεθοδολογία
 
 - Ο χρόνος εκπαίδευσης καλύπτει όλα τα epochs, μαζί με τη φόρτωση δεδομένων. Ο χρόνος εφαρμογής καλύπτει ένα πλήρες πέρασμα του test set. Η φόρτωση του dataset και η δημιουργία του μοντέλου εξαιρούνται.
@@ -336,6 +371,7 @@ python q6_mobilenet_full_finetune.py --smoke
 - Στο Ερώτημα 4 το βελτιωμένο MLP χρησιμοποιεί τα ίδια seeds, warm-up, χρονομέτρηση και ρυθμίσεις εκπαίδευσης με το MLP του Ερωτήματος 1. Το dropout είναι ενεργό μόνο κατά την εκπαίδευση.
 - Στο Ερώτημα 5 ο διαχωρισμός γίνεται με `random_split` και σταθερό seed και είναι ίδιος για όλους τους 25 συνδυασμούς. Η επιλογή βασίζεται μόνο στο validation accuracy, με ισοπαλίες να λύνονται υπέρ λιγότερων κρυμμένων νευρώνων και μετά χαμηλότερου dropout. Το test set φορτώνεται μόνο αφού ο καλύτερος συνδυασμός έχει γραφτεί στο `best_config.json`.
 - Στο Ερώτημα 6 κάθε εκτέλεση δημιουργεί νέο προ-εκπαιδευμένο MobileNetV2 και αντικαθιστά τον classifier μετά τον ορισμό του seed, ώστε τα αρχικά βάρη να είναι ίδια με αυτά της εκτέλεσης του Ερωτήματος 1 με το ίδιο seed. Όλες οι παράμετροι έχουν `requires_grad=True`.
+- Στο Ερώτημα 7 κάθε εκτέλεση παγώνει το `model.features` και αντικαθιστά τον classifier όπως στο Ερώτημα 1, και στη συνέχεια ξεπαγώνει τα `features[16]`, `features[17]` και `features[18]`. Οι παγωμένες παράμετροι δεν λαμβάνουν gradients. Όπως στο αρχικό script, το `model.train()` ενημερώνει και τα στατιστικά BatchNorm των παγωμένων επιπέδων.
 
 Αλλαγές σε σχέση με τα αρχικά scripts: καμία στις αρχιτεκτονικές, τις υπερ-παραμέτρους, τη συνάρτηση loss, τον optimizer, τους μετασχηματισμούς ή τους data loaders. Το πλαίσιο πειραμάτων προσθέτει χρονομέτρηση, seeds, επαναλήψεις, warm-up και αρχεία αποτελεσμάτων. Ο test loader επιστρέφει επίσης τον δείκτη κάθε εικόνας. Το loss ανά epoch του MobileNetV2 αθροίζεται στη συσκευή αντί για κλήση `.item()` σε κάθε βήμα.
 
@@ -347,13 +383,13 @@ python q6_mobilenet_full_finetune.py --smoke
 python -m unittest discover -s tests -t . -v
 ```
 
-87 unit tests ελέγχουν τη χρονομέτρηση, τη συγκέντρωση αποτελεσμάτων, τα αρχεία προβλέψεων, την πιστότητα των μοντέλων, τον υπολογισμό της επιτάχυνσης, τον έλεγχο του GPU baseline, την εκτέλεση μόνο σε CPU, την καταμέτρηση λαθών, τα ζεύγη σύγχυσης, την αντιστοίχιση δεικτών, τα κοινά λάθη, τη δημιουργία σχημάτων, την αρχιτεκτονική του βελτιωμένου MLP, τη συμπεριφορά του dropout, τη σύγκριση με το baseline, το πλέγμα υπερ-παραμέτρων, τον διαχωρισμό validation, την επιλογή του καλύτερου συνδυασμού, την προστασία από διαρροή του test set, τα εκπαιδεύσιμα επίπεδα και το πλήθος παραμέτρων του MobileNetV2 με fine-tuning, καθώς και τη διατήρηση της προεπεξεργασίας και των ρυθμίσεων εκπαίδευσής του. Χρησιμοποιούν συνθετικά δεδομένα σε CPU: χωρίς GPU, χωρίς download του MNIST, χωρίς προ-εκπαιδευμένα βάρη. Το GitHub Actions (`.github/workflows/python-tests.yml`) τα εκτελεί με PyTorch μόνο για CPU σε κάθε pull request και push στο `master`.
+99 unit tests ελέγχουν τη χρονομέτρηση, τη συγκέντρωση αποτελεσμάτων, τα αρχεία προβλέψεων, την πιστότητα των μοντέλων, τον υπολογισμό της επιτάχυνσης, τον έλεγχο του GPU baseline, την εκτέλεση μόνο σε CPU, την καταμέτρηση λαθών, τα ζεύγη σύγχυσης, την αντιστοίχιση δεικτών, τα κοινά λάθη, τη δημιουργία σχημάτων, την αρχιτεκτονική του βελτιωμένου MLP, τη συμπεριφορά του dropout, τη σύγκριση με το baseline, το πλέγμα υπερ-παραμέτρων, τον διαχωρισμό validation, την επιλογή του καλύτερου συνδυασμού, την προστασία από διαρροή του test set, τα εκπαιδεύσιμα επίπεδα και το πλήθος παραμέτρων του MobileNetV2 με fine-tuning, τη διατήρηση της προεπεξεργασίας και των ρυθμίσεων εκπαίδευσής του, καθώς και τα επίπεδα που επιλέγονται για μερικό fine-tuning, χωρίς gradients για τις παγωμένες παραμέτρους. Χρησιμοποιούν συνθετικά δεδομένα σε CPU: χωρίς GPU, χωρίς download του MNIST, χωρίς προ-εκπαιδευμένα βάρη. Το GitHub Actions (`.github/workflows/python-tests.yml`) τα εκτελεί με PyTorch μόνο για CPU σε κάθε pull request και push στο `master`.
 
 ## Φάκελοι
 
 - `mnist_*.py`: τα αρχικά scripts (αμετάβλητα).
 - `a2/`: κοινός κώδικας (`models`, `data`, `timing`, `experiment`, `stats`, `io_utils`, `environment`, `compare`, `misclassification`, `figures`, `search`).
-- `q1_gpu_baseline.py`, `q2_cpu_comparison.py`, `q3_misclassification_analysis.py`, `q4_enhanced_mlp.py`, `q5_mlp_hyperparameter_search.py`, `q6_mobilenet_full_finetune.py`: scripts για τα Ερωτήματα 1–6.
+- `q1_gpu_baseline.py`, `q2_cpu_comparison.py`, `q3_misclassification_analysis.py`, `q4_enhanced_mlp.py`, `q5_mlp_hyperparameter_search.py`, `q6_mobilenet_full_finetune.py`, `q7_mobilenet_partial_finetune.py`: scripts για τα Ερωτήματα 1–7.
 - `tests/`: unit tests.
-- `results/question1/` έως `results/question6/`: αποτελέσματα CSV/JSON ανά ερώτημα, προβλέψεις ανά εικόνα, logs, σχήματα και `SUMMARY.md`.
+- `results/question1/` έως `results/question7/`: αποτελέσματα CSV/JSON ανά ερώτημα, προβλέψεις ανά εικόνα, logs, σχήματα και `SUMMARY.md`.
 - `docs/`: η εκφώνηση της εργασίας (PDF).

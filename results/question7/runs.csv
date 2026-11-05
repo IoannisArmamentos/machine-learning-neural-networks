@@ -1,0 +1,4 @@
+model,run,seed,n_correct,n_test,accuracy_percent,train_seconds,inference_seconds,trainable_parameters,total_parameters,unfrozen_layers,peak_gpu_memory_allocated_gib,peak_gpu_memory_reserved_gib,epoch_seconds,epoch_mean_loss
+mobilenetv2_partial_finetune_last3,1,0,9874,10000,98.74,127.67014005099918,6.584515720998752,1218890,2236682,features[16];features[17];features[18];classifier[1],1.054,1.441,43.0572;41.9584;42.6539,0.083330;0.031167;0.023302
+mobilenetv2_partial_finetune_last3,2,1,9909,10000,99.09,128.15003916699789,6.3843941839986655,1218890,2236682,features[16];features[17];features[18];classifier[1],1.054,1.441,42.7081;42.5291;42.9124,0.080716;0.034019;0.022782
+mobilenetv2_partial_finetune_last3,3,2,9925,10000,99.25,124.88456721300099,6.50818891200106,1218890,2236682,features[16];features[17];features[18];classifier[1],1.054,1.441,41.5788;41.5979;41.7077,0.081114;0.033731;0.023694
