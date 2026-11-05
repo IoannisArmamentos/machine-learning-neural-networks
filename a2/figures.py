@@ -1,6 +1,7 @@
 """Labelled image grids of MNIST digits, drawn with Pillow (no plotting library needed)."""
 from __future__ import annotations
 
+import math
 from typing import NamedTuple, Sequence
 
 import numpy as np
@@ -154,4 +155,82 @@ def heatmap(values: Sequence[Sequence[float]], row_labels: Sequence[str], col_la
     d.text((bar_l + bar_w, legend_top + bar_h + 6), value_fmt.format(hi), fill=FG, font=f_small, anchor="rt")
     if scale_label:
         d.text((bar_l + bar_w // 2, legend_top + bar_h + 6), scale_label, fill=MUTED, font=f_small, anchor="mt")
+    return img
+
+
+# ---- Question 8 charts (Pillow; one hue for data, gray for context, text in ink colours) ----
+EMPHASIS, CONTEXT, GRID, INK_2 = (42, 120, 214), (150, 150, 150), (228, 228, 228), (85, 85, 85)
+
+
+def _nice_ticks(lo: float, hi: float, n: int = 5) -> list[float]:
+    raw = (hi - lo) / n
+    mag = 10 ** math.floor(math.log10(raw))
+    step = min((s * mag for s in (1, 2, 2.5, 5, 10) if s * mag >= raw), default=raw)
+    start = math.ceil(lo / step) * step
+    return [round(start + i * step, 10) for i in range(int((hi - start) / step + 1e-9) + 1)]
+
+
+def dot_plot(rows: Sequence[tuple[str, float, float, bool]], title: str, subtitle: str, x_label: str,
+             x_min: float, x_max: float, value_fmt: str = "{:.2f} ± {:.2f}") -> Image.Image:
+    """Horizontal dot plot with ±SD whiskers. rows = (label, mean, sd, emphasised), drawn top to bottom."""
+    f_title, f_sub, f_lab, f_small = _font(18), _font(13), _font(14), _font(12)
+    left, right, top, row_h = 300, 150, 78, 40
+    plot_w = 520
+    width, height = left + plot_w + right, top + row_h * len(rows) + 62
+    img = Image.new("RGB", (width, height), BG)
+    d = ImageDraw.Draw(img)
+    d.text((16, 12), title, fill=FG, font=f_title)
+    d.text((16, 40), subtitle, fill=INK_2, font=f_sub)
+    x = lambda v: left + (v - x_min) / (x_max - x_min) * plot_w
+    bottom = top + row_h * len(rows)
+    for t in _nice_ticks(x_min, x_max):
+        d.line([(x(t), top - 6), (x(t), bottom)], fill=GRID, width=1)
+        d.text((x(t), bottom + 6), f"{t:g}", fill=INK_2, font=f_small, anchor="mt")
+    d.text((left + plot_w // 2, bottom + 28), x_label, fill=INK_2, font=f_lab, anchor="mt")
+    for i, (label, mean, sd, emph) in enumerate(rows):
+        y = top + row_h * i + row_h // 2
+        colour = EMPHASIS if emph else CONTEXT
+        d.text((left - 14, y), label, fill=FG, font=f_lab, anchor="rm")
+        lo, hi = max(mean - sd, x_min), min(mean + sd, x_max)
+        d.line([(x(lo), y), (x(hi), y)], fill=colour, width=2)
+        for e in (lo, hi):
+            d.line([(x(e), y - 6), (x(e), y + 6)], fill=colour, width=2)
+        r = 6
+        d.ellipse([x(mean) - r - 2, y - r - 2, x(mean) + r + 2, y + r + 2], fill=BG)      # 2px surface ring
+        d.ellipse([x(mean) - r, y - r, x(mean) + r, y + r], fill=colour)
+        d.text((x(hi) + 12, y), value_fmt.format(mean, sd), fill=FG if emph else INK_2, font=f_small, anchor="lm")
+    return img
+
+
+def bar_panels(labels: Sequence[str], panels: Sequence[tuple[str, Sequence[float], str]], title: str,
+               subtitle: str) -> Image.Image:
+    """Small multiples of horizontal bars sharing the row labels; each panel has its own zero-based axis.
+    panels = (panel title, values, value format)."""
+    f_title, f_sub, f_lab, f_small = _font(18), _font(13), _font(14), _font(12)
+    left, top, row_h, bar_h, panel_w, gap = 300, 96, 40, 18, 330, 40
+    width = left + len(panels) * (panel_w + gap) + 20
+    height = top + row_h * len(labels) + 56
+    img = Image.new("RGB", (width, height), BG)
+    d = ImageDraw.Draw(img)
+    d.text((16, 12), title, fill=FG, font=f_title)
+    d.text((16, 40), subtitle, fill=INK_2, font=f_sub)
+    bottom = top + row_h * len(labels)
+    for i, lab in enumerate(labels):
+        d.text((left - 14, top + row_h * i + row_h // 2), lab, fill=FG, font=f_lab, anchor="rm")
+    for k, (ptitle, values, fmt) in enumerate(panels):
+        x0 = left + k * (panel_w + gap)
+        vmax = max(values)
+        ticks = _nice_ticks(0, vmax * 1.05)
+        scale = (panel_w - 70) / max(ticks[-1], vmax)
+        d.text((x0, top - 26), ptitle, fill=FG, font=f_lab)
+        for t in ticks:
+            d.line([(x0 + t * scale, top - 4), (x0 + t * scale, bottom)], fill=GRID, width=1)
+            d.text((x0 + t * scale, bottom + 6), f"{t:g}", fill=INK_2, font=f_small, anchor="mt")
+        d.line([(x0, top - 4), (x0, bottom)], fill=CONTEXT, width=1)                     # baseline
+        for i, v in enumerate(values):
+            y = top + row_h * i + (row_h - bar_h) // 2
+            w = max(v * scale, 2)
+            d.rounded_rectangle([x0, y, x0 + w, y + bar_h], radius=4, fill=EMPHASIS)
+            d.rectangle([x0, y, x0 + min(4, w), y + bar_h], fill=EMPHASIS)                # square at the baseline
+            d.text((x0 + w + 6, y + bar_h // 2), fmt.format(v), fill=FG, font=f_small, anchor="lm")
     return img

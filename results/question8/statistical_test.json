@@ -1,0 +1,75 @@
+{
+  "test": "exact two-sided McNemar test (binomial test on discordant pairs, p = 0.5)",
+  "selection_rule": "The two configurations with the highest mean test accuracy over their 3 GPU runs (ties: fewer trainable parameters, then fixed configuration order) are compared with an exact two-sided McNemar test on their seed-0 runs (run 1 of every configuration), paired by original MNIST test index. Seeds 1 and 2 are reported separately as a sensitivity check; runs are never pooled. Significance level alpha = 0.05. The rule was fixed before computing the test.",
+  "model_a": {
+    "config": "q6_mobilenetv2_full",
+    "label": "Q6 MobileNetV2, full FT",
+    "mean_accuracy_percent": 99.03
+  },
+  "model_b": {
+    "config": "q7_mobilenetv2_last3",
+    "label": "Q7 MobileNetV2, last 3 FT",
+    "mean_accuracy_percent": 99.02666666666667
+  },
+  "primary_seed": 0,
+  "primary": {
+    "n_images": 10000,
+    "contingency": {
+      "both_correct": 9792,
+      "a_only_correct": 89,
+      "b_only_correct": 82,
+      "both_incorrect": 37
+    },
+    "discordant_pairs": 171,
+    "a_only_correct": 89,
+    "b_only_correct": 82,
+    "accuracy_a_percent": 98.81,
+    "accuracy_b_percent": 98.74,
+    "p_value_exact_two_sided": 0.6464833446153442,
+    "alpha": 0.05,
+    "significant": false
+  },
+  "sensitivity_other_seeds_not_pooled": {
+    "seed_1": {
+      "n_images": 10000,
+      "contingency": {
+        "both_correct": 9868,
+        "a_only_correct": 55,
+        "b_only_correct": 41,
+        "both_incorrect": 36
+      },
+      "discordant_pairs": 96,
+      "a_only_correct": 55,
+      "b_only_correct": 41,
+      "accuracy_a_percent": 99.23,
+      "accuracy_b_percent": 99.09,
+      "p_value_exact_two_sided": 0.18428587288036472,
+      "alpha": 0.05,
+      "significant": false
+    },
+    "seed_2": {
+      "n_images": 10000,
+      "contingency": {
+        "both_correct": 9862,
+        "a_only_correct": 43,
+        "b_only_correct": 63,
+        "both_incorrect": 32
+      },
+      "discordant_pairs": 106,
+      "a_only_correct": 43,
+      "b_only_correct": 63,
+      "accuracy_a_percent": 99.05,
+      "accuracy_b_percent": 99.25,
+      "p_value_exact_two_sided": 0.06446359198949372,
+      "alpha": 0.05,
+      "significant": false
+    }
+  },
+  "contingency_definition": {
+    "both_correct": "A and B correct",
+    "a_only_correct": "A correct, B wrong",
+    "b_only_correct": "A wrong, B correct",
+    "both_incorrect": "A and B wrong"
+  },
+  "interpretation_note": "McNemar tests whether, on these 10,000 test images, the two trained models' error rates differ (H0: discordant pairs split 50/50). A non-significant result means no difference was detected; it does not establish equivalence. The test concerns these two trained models (one seed each), not all possible training runs."
+}
