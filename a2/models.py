@@ -103,6 +103,17 @@ def build_mobilenet_v2_frozen() -> nn.Module:
     return model
 
 
+def build_mobilenet_v2_full_finetune(weights=models.MobileNet_V2_Weights.IMAGENET1K_V1) -> nn.Module:
+    """Question 6: same as build_mobilenet_v2_frozen (same ImageNet weights, same classifier[1]
+    replacement) but nothing is frozen, so the whole network is fine-tuned.
+    `weights=None` builds the identical architecture without downloading (used in tests)."""
+    model = models.mobilenet_v2(weights=weights)
+    model.classifier[1] = nn.Linear(model.classifier[1].in_features, 10)
+    for param in model.parameters():
+        param.requires_grad = True        # explicit: features and classifier are all trainable
+    return model
+
+
 def _flatten(images: torch.Tensor) -> torch.Tensor:
     return images.reshape(-1, 28 * 28)
 
@@ -146,3 +157,9 @@ def dropout_mlp_spec(hidden_size: int, dropout: float) -> ModelSpec:
     return ModelSpec(f"mlp_dropout_h{hidden_size}_p{dropout:g}",
                      partial(DropoutMLP, hidden_size, dropout), nn.NLLLoss, epochs=5,
                      transform="tensor", prepare_input=_flatten)
+
+# Question 6 model. Same training configuration as the original MobileNetV2 spec (Adam, lr 0.001,
+# batch 100, 3 epochs, CrossEntropyLoss, ImageNet preprocessing). Not part of MODEL_SPECS.
+MOBILENET_FULL_FT_SPEC = ModelSpec("mobilenetv2_full_finetune", build_mobilenet_v2_full_finetune,
+                                   nn.CrossEntropyLoss, epochs=3, transform="imagenet",
+                                   prepare_input=_identity)
